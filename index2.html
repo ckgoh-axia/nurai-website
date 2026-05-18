@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nurai — Institutional Intelligence Infrastructure</title>
+  <link rel="icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:         #0D6E5A;
+      --teal-dk:      #0a5a49;
+      --teal-lt:      #E8F5F1;
+      --teal-bright:  #5EEAD4;
+      --forest:       #0A3D2E;
+      --forest-mid:   #0d4f3c;
+      --amber:        #C97A10;
+      --amber-lt:     #FEF3C7;
+      --blue:         #1d4ed8;
+      --blue-lt:      #EFF6FF;
+      --text:         #111827;
+      --sub:          #4B5563;
+      --muted:        #9CA3AF;
+      --border:       #E5E7EB;
+      --surface:      #F7F8F7;
+      --bg:           #F9FAFB;
+      --white:        #ffffff;
+      --max:          1200px;
+      --pad:          clamp(24px, 5vw, 64px);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── TYPOGRAPHY SYSTEM ── */
+    .display     { font-family: 'Space Grotesk', sans-serif; }
+    .t-display   { font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; }
+    .t-headline  { font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; }
+    .t-label     { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; font-family: 'Inter', sans-serif; }
+    .t-mono      { font-variant-numeric: tabular-nums; }
+
+    /* ── SCROLL REVEALS ── */
+    [data-reveal] {
+      opacity: 0;
+      clip-path: inset(0 0 12px 0);
+      transform: translateY(14px);
+      transition:
+        opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+        clip-path 0.7s cubic-bezier(0.16,1,0.3,1),
+        transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    [data-reveal].visible {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+      transform: none;
+    }
+    [data-reveal-d="1"] { transition-delay: 0.07s; }
+    [data-reveal-d="2"] { transition-delay: 0.14s; }
+    [data-reveal-d="3"] { transition-delay: 0.21s; }
+    [data-reveal-d="4"] { transition-delay: 0.28s; }
+    [data-reveal-d="5"] { transition-delay: 0.35s; }
+
+    /* ── CONTAINER ── */
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
+
+    /* ── SECTION COUNTER GHOST ── */
+    .sec-ghost {
+      position: absolute; top: -12px; right: var(--pad);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: clamp(80px, 12vw, 160px);
+      color: rgba(0,0,0,0.025);
+      line-height: 1; pointer-events: none; user-select: none;
+      letter-spacing: -0.04em;
+    }
+    .sec-ghost-light { color: rgba(255,255,255,0.04); }
+
+    /* ── RULE DIVIDER ── */
+    .rule { border: none; border-top: 1px solid var(--border); }
+    .rule-heavy { border-top: 2px solid var(--text); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 4px;
+      font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+      white-space: nowrap; letter-spacing: -0.01em;
+    }
+    .btn-teal { background: var(--teal); color: #fff; }
+    .btn-teal:hover { background: var(--teal-dk); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,110,90,0.28); }
+    .btn-outline { background: transparent; color: var(--teal); border: 1.5px solid var(--teal); }
+    .btn-outline:hover { background: var(--teal-lt); }
+    .btn-white { background: #fff; color: var(--forest); font-weight: 700; border-radius: 4px; }
+    .btn-white:hover { background: #f0faf7; transform: translateY(-1px); }
+    .btn-ghost { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.82); border: 1px solid rgba(255,255,255,0.18); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.14); }
+
+    /* ══════════════════════════════════════
+       NAV
+    ══════════════════════════════════════ */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      height: 64px;
+    }
+    .nav-inner {
+      max-width: var(--max); margin: 0 auto;
+      padding: 0 var(--pad);
+      height: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 40px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .nav-mark { height: 34px; width: 34px; display: block; object-fit: contain; }
+    .nav-wordmark {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px; font-weight: 700;
+      color: var(--text); letter-spacing: -0.03em;
+    }
+    .nav-links { display: flex; gap: 28px; list-style: none; justify-content: center; }
+    .nav-links a {
+      color: var(--sub); text-decoration: none;
+      font-size: 13px; font-weight: 500;
+      transition: color 0.14s; letter-spacing: -0.01em;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .lang-toggle { display: flex; background: var(--surface); border-radius: 4px; padding: 3px; gap: 2px; }
+    .lang-btn {
+      padding: 4px 9px; border-radius: 3px;
+      font-size: 11px; font-weight: 700;
+      text-decoration: none; color: var(--muted);
+      transition: all 0.14s;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .lang-btn.active { background: var(--white); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+
+    /* ══════════════════════════════════════
+       HERO
+    ══════════════════════════════════════ */
+    .hero {
+      background: var(--forest);
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Swiss grid lines in background */
+    .hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 100px 100px;
+      pointer-events: none;
+    }
+
+    /* Vertical divider between columns */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 52%;
+      width: 1px;
+      background: rgba(255,255,255,0.07);
+      z-index: 1;
+    }
+
+    .hero-left {
+      padding: clamp(56px, 8vw, 96px) var(--pad) clamp(48px, 6vw, 72px) var(--pad);
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; z-index: 2;
+    }
+
+    .hero-index {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 40px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .hero-index::before {
+      content: '';
+      display: block; width: 28px; height: 1px;
+      background: rgba(255,255,255,0.25);
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(44px, 5.8vw, 76px);
+      font-weight: 700; line-height: 1.0;
+      color: #fff; margin-bottom: 28px;
+      letter-spacing: -0.035em;
+      max-width: 580px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--teal-bright);
+    }
+    .hero-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.75;
+      margin-bottom: 40px;
+      max-width: 460px;
+    }
+    .hero-sub strong { color: rgba(255,255,255,0.88); font-weight: 600; }
+    .hero-ctas { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 64px; }
+
+    /* Three honest claims strip */
+    .hero-strip {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+    .hero-strip-item {
+      padding-right: 20px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .hero-strip-item:last-child { border-right: none; padding-right: 0; }
+    .hs-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.35; margin-bottom: 3px;
+    }
+    .hs-label {
+      font-size: 11px; color: rgba(255,255,255,0.32);
+      font-weight: 400;
+    }
+
+    /* Right: chat mockup */
+    .hero-right {
+      display: flex; align-items: center; justify-content: center;
+      padding: 56px clamp(20px, 4vw, 52px);
+      position: relative; z-index: 2;
+    }
+    .chat-device {
+      background: #E5DDD5;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow:
+        0 48px 96px rgba(0,0,0,0.55),
+        0 0 0 1px rgba(255,255,255,0.05);
+      width: 100%; max-width: 360px;
+    }
+    .chat-topbar {
+      background: #075E54; padding: 13px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .chat-back {
+      color: rgba(255,255,255,0.65);
+      display: flex; align-items: center; flex-shrink: 0;
+    }
+    .chat-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #0D6E5A, #0A3D2E);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .chat-info { flex: 1; }
+    .chat-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; }
+    .chat-status { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+    .chat-menu {
+      color: rgba(255,255,255,0.65);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .chat-body {
+      padding: 12px 10px;
+      display: flex; flex-direction: column; gap: 9px;
+      min-height: 340px;
+    }
+    .bubble {
+      max-width: 88%; padding: 9px 13px;
+      font-size: 13px; line-height: 1.5; position: relative;
+    }
+    .bubble.in {
+      background: #fff; border-radius: 0 8px 8px 8px;
+      align-self: flex-start;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.09);
+    }
+    .bubble.out {
+      background: #DCF8C6; border-radius: 8px 0 8px 8px;
+      align-self: flex-end;
+    }
+    .btime {
+      font-size: 10px; color: #999;
+      text-align: right; margin-top: 4px;
+      display: flex; align-items: center; justify-content: flex-end; gap: 3px;
+    }
+    .cite {
+      font-size: 11px;
+      background: #f0fdf4; border-left: 3px solid #0D6E5A;
+      padding: 6px 9px; margin-top: 7px; border-radius: 0 4px 4px 0;
+      color: #065F46;
+    }
+    .bbadge {
+      font-size: 10px; padding: 2px 8px; border-radius: 3px;
+      font-weight: 700; display: inline-block; margin-top: 5px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .bbadge-r { background: #dcfce7; color: #166534; }
+    .bbadge-g { background: var(--amber-lt); color: #92400E; }
+
+    /* ══════════════════════════════════════
+       PROBLEM — 02
+    ══════════════════════════════════════ */
+    .problem-section {
+      background: var(--white);
+      padding: 112px 0 100px;
+      position: relative;
+    }
+
+    .problem-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: end;
+      margin-bottom: 64px;
+    }
+    .problem-top h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(32px, 4vw, 56px);
+      font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.06; color: var(--text);
+    }
+    .problem-top p {
+      font-size: 16px; color: var(--sub);
+      max-width: 460px; line-height: 1.75;
+    }
+
+    /* Evolution as rule-separated rows */
+    .evo-header {
+      display: grid;
+      grid-template-columns: 28px 100px 1fr 1fr;
+      gap: 24px; align-items: center;
+      padding: 0 0 10px;
+      border-bottom: 2px solid var(--text);
+      margin-bottom: 0;
+    }
+    .evo-hdr-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .evo-row {
+      display: grid;
+      grid-template-columns: 28px 100px 1fr 1fr;
+      gap: 24px; align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .evo-row:last-child { background: var(--teal-lt); border-color: #c6e8df; border-radius: 0 0 8px 8px; }
+    .evo-row-n {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 700;
+      color: var(--muted); text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .evo-era {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .evo-row:last-child .evo-era { color: var(--teal); font-weight: 800; }
+    .evo-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 600;
+      color: var(--text); line-height: 1.3;
+    }
+    .evo-row:last-child .evo-name { color: var(--teal-dk); }
+    .evo-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .evo-row:last-child .evo-desc { color: var(--teal); }
+    .evo-now { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; background: var(--teal); color: #fff; padding: 2px 7px; border-radius: 3px; margin-left: 8px; }
+
+    /* Two structural gaps */
+    .gaps-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 48px;
+    }
+    .gap-col {
+      background: var(--white); padding: 40px 36px;
+    }
+    .gap-n {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 16px;
+    }
+    .gap-col h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1.2;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .gap-col p { font-size: 15px; color: var(--sub); line-height: 1.7; margin-bottom: 20px; }
+    .gap-proof {
+      font-size: 13px; font-weight: 600;
+      color: var(--teal);
+      padding-top: 14px; border-top: 1px solid var(--border);
+    }
+
+    /* ══════════════════════════════════════
+       THREE STATES — 03
+    ══════════════════════════════════════ */
+    .states-section {
+      background: var(--surface);
+      padding: 112px 0 100px;
+      position: relative;
+    }
+    .states-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px; align-items: end;
+      margin-bottom: 60px;
+    }
+    .states-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(30px, 3.6vw, 52px);
+      font-weight: 700; letter-spacing: -0.03em;
+      line-height: 1.06; color: var(--text);
+    }
+    .states-header p {
+      font-size: 16px; color: var(--sub);
+      line-height: 1.75; max-width: 420px;
+    }
+
+    .states-layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 48px; align-items: start;
+    }
+
+    /* Index rows */
+    .state-rows { border-top: 2px solid var(--text); }
+    .state-row {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 28px; align-items: start;
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .state-row-inner {
+      display: grid;
+      grid-template-columns: 160px 1fr 180px;
+      gap: 24px; align-items: start;
+    }
+    .state-index {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px; font-weight: 700;
+      color: rgba(0,0,0,0.08);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      padding-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .state-badge {
+      display: inline-flex; align-items: center;
+      padding: 5px 11px; border-radius: 3px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      width: fit-content; margin-top: 2px;
+    }
+    .badge-r { background: #dcfce7; color: #166534; }
+    .badge-s { background: var(--blue-lt); color: var(--blue); }
+    .badge-g { background: var(--amber-lt); color: #92400E; }
+
+    .state-content h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px; font-weight: 600;
+      letter-spacing: -0.02em; color: var(--text);
+      margin-bottom: 8px; line-height: 1.3; margin-top: 12px;
+    }
+    .state-content p { font-size: 13px; color: var(--sub); line-height: 1.65; }
+    .state-signal { padding-top: 16px; }
+    .state-signal p {
+      font-size: 12px; font-weight: 500;
+      color: var(--sub); line-height: 1.6;
+    }
+    .sig-r { color: #166534 !important; }
+    .sig-s { color: var(--blue) !important; }
+    .sig-g { color: #92400E !important; }
+
+    /* Corpus health panel */
+    .corpus-panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      position: sticky; top: 84px;
+    }
+    .cp-bar {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cp-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+    .cp-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .live-dot {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; color: #16a34a;
+    }
+    .live-dot::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e; animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    .cp-body { padding: 4px 0; }
+    .cp-row {
+      display: grid;
+      grid-template-columns: 1fr 36px 68px 54px;
+      gap: 6px; align-items: center;
+      padding: 9px 18px;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 12px;
+    }
+    .cp-row:last-child { border-bottom: none; }
+    .cp-hdr { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .cp-name { font-weight: 600; color: var(--text); }
+    .cp-type { font-size: 11px; color: var(--muted); }
+    .cp-docs { font-weight: 600; color: var(--text); text-align: center; }
+    .cp-upd { color: var(--muted); font-size: 11px; }
+    .cp-ok { font-size: 11px; font-weight: 700; color: #16a34a; }
+    .cp-gap-st { font-size: 11px; font-weight: 700; color: #c2410c; }
+    .cp-gaps {
+      padding: 12px 18px;
+      background: #fffbeb;
+      border-top: 1px solid #fde68a;
+    }
+    .cp-gap-lbl {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #92400E; margin-bottom: 9px;
+    }
+    .cp-gap-item {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 7px; gap: 10px;
+    }
+    .cp-gap-txt { font-size: 12px; color: var(--text); font-weight: 500; }
+    .cp-gap-badge {
+      font-size: 10px; font-weight: 700; color: #92400E;
+      background: #fde68a; padding: 2px 7px; border-radius: 3px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .cp-cov { padding: 12px 18px; border-top: 1px solid var(--border); }
+    .cp-cov-bar { height: 3px; background: var(--border); margin: 7px 0; }
+    .cp-cov-fill { height: 100%; background: var(--teal); }
+    .cp-cov-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+    .cp-cov-pct { font-weight: 700; color: var(--teal); }
+    .cp-actions {
+      padding: 12px 18px; display: flex; gap: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .cp-primary {
+      flex: 1; padding: 8px 12px; background: var(--teal); color: #fff;
+      border: none; border-radius: 4px; font-size: 12px; font-weight: 700;
+      cursor: pointer; text-align: center;
+    }
+    .cp-secondary {
+      padding: 8px 12px; background: var(--white); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+
+    /* ══════════════════════════════════════
+       HOW IT WORKS — 04
+    ══════════════════════════════════════ */
+    .how-section { background: var(--white); padding: 112px 0 100px; position: relative; }
+    .how-header { margin-bottom: 64px; }
+    .how-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 3.4vw, 48px);
+      font-weight: 700; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .how-header p { font-size: 16px; color: var(--sub); max-width: 460px; line-height: 1.72; }
+
+    /* Steps as index rows */
+    .steps-rows { border-top: 2px solid var(--text); }
+    .step-row {
+      display: grid;
+      grid-template-columns: 56px 200px 1fr 1fr;
+      gap: 32px; align-items: start;
+      padding: 36px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-n {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px; font-weight: 700;
+      color: rgba(0,0,0,0.07);
+      letter-spacing: -0.03em; line-height: 1;
+      font-variant-numeric: tabular-nums;
+      padding-top: 4px;
+    }
+    .step-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.02em;
+      line-height: 1.3; padding-top: 4px;
+    }
+    .step-desc { font-size: 14px; color: var(--sub); line-height: 1.7; }
+    .step-detail {
+      font-size: 12px; color: var(--muted);
+      line-height: 1.6; padding-top: 4px;
+    }
+    .step-detail strong { color: var(--sub); }
+
+    /* Flow diagram */
+    .flow-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 32px 28px; margin-top: 56px;
+      display: flex; align-items: center; gap: 0;
+      overflow-x: auto;
+    }
+    .flow-col { flex-shrink: 0; }
+    .flow-lbl {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .flow-sources, .flow-outputs { display: flex; flex-direction: column; gap: 6px; }
+    .flow-src, .flow-out {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 500; color: var(--sub);
+      padding: 7px 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .flow-out-r { border-left: 3px solid #22c55e; }
+    .flow-out-s { border-left: 3px solid var(--blue); }
+    .flow-out-g { border-left: 3px solid var(--amber); }
+    .fo-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .flow-arrow {
+      flex: 1; min-width: 60px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 12px;
+    }
+    .flow-engine {
+      flex-shrink: 0; background: var(--white);
+      border: 2px solid var(--teal);
+      padding: 20px 24px; text-align: center;
+    }
+    .flow-engine-mark { height: 32px; width: 32px; display: block; object-fit: contain; margin: 0 auto 6px; }
+    .flow-engine-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--teal);
+    }
+    .flow-engine-sub { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+
+    /* ══════════════════════════════════════
+       FEATURES — 05 (dark)
+    ══════════════════════════════════════ */
+    .features-section {
+      background: var(--forest);
+      padding: 112px 0 100px;
+      position: relative;
+    }
+    .features-header { margin-bottom: 64px; }
+    .features-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(30px, 3.6vw, 52px);
+      font-weight: 700; letter-spacing: -0.03em;
+      color: #fff; margin-bottom: 14px; line-height: 1.06;
+    }
+    .features-header p { font-size: 16px; color: rgba(255,255,255,0.5); max-width: 480px; line-height: 1.72; }
+
+    .features-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px; align-items: start;
+    }
+    .feat-list { display: flex; flex-direction: column; gap: 0; border-top: 1px solid rgba(255,255,255,0.12); }
+    .feat-item {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 20px;
+      padding: 28px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .feat-icon {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+    .feat-icon svg { width: 16px; height: 16px; stroke: var(--teal-bright); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .feat-body h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 600;
+      color: #fff; margin-bottom: 7px; letter-spacing: -0.02em;
+    }
+    .feat-body p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.65; }
+
+    /* Value spec table */
+    .value-table { border-top: 1px solid rgba(255,255,255,0.12); }
+    .vt-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px; background: rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .vt-cell { padding: 28px 28px; background: rgba(255,255,255,0.03); }
+    .vt-when {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin-bottom: 10px;
+    }
+    .vt-anchor {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 30px; font-weight: 700;
+      color: rgba(255,255,255,0.08);
+      letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px;
+    }
+    .vt-anchor em { font-style: normal; color: var(--teal-bright); }
+    .vt-cell h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 600;
+      color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;
+    }
+    .vt-cell p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.65; margin-bottom: 14px; }
+    .vt-bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .vt-bullets li {
+      font-size: 12px; color: rgba(255,255,255,0.5);
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .vt-bullets li::before { content: '—'; color: rgba(255,255,255,0.2); flex-shrink: 0; }
+
+    /* ══════════════════════════════════════
+       CHANNELS — 06
+    ══════════════════════════════════════ */
+    .channels-section { background: var(--white); padding: 112px 0 100px; position: relative; }
+    .channels-header { margin-bottom: 64px; }
+    .channels-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 3.2vw, 48px);
+      font-weight: 700; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .channels-header p { font-size: 16px; color: var(--sub); max-width: 500px; line-height: 1.72; }
+
+    /* Editorial channel layout */
+    .channels-rows { border-top: 2px solid var(--text); }
+    .channel-row {
+      display: grid;
+      grid-template-columns: 100px 200px 1fr auto;
+      gap: 32px; align-items: center;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ch-logo-wrap { height: 40px; display: flex; align-items: center; }
+    .ch-logo { height: 34px; width: auto; max-width: 88px; object-fit: contain; display: block; }
+    .ch-icon {
+      width: 40px; height: 40px;
+      background: var(--teal-lt);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ch-icon svg { width: 18px; height: 18px; stroke: var(--teal); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .ch-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.02em;
+    }
+    .ch-desc { font-size: 13px; color: var(--sub); line-height: 1.55; }
+    .ch-badge {
+      display: inline-block; padding: 4px 10px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      border-radius: 3px; white-space: nowrap;
+    }
+    .badge-wa { background: #dcfce7; color: #166534; }
+    .badge-line { background: #dbeafe; color: #1e40af; }
+    .badge-web { background: var(--teal-lt); color: var(--teal); }
+    .badge-async { background: var(--bg); color: var(--muted); }
+    .badge-ent { background: #eef2ff; color: #4338ca; }
+    .badge-api { background: var(--bg); color: var(--sub); }
+
+    /* ══════════════════════════════════════
+       PRICING — 07
+    ══════════════════════════════════════ */
+    .pricing-section { background: var(--surface); padding: 112px 0 100px; position: relative; }
+    .pricing-header { margin-bottom: 56px; }
+    .pricing-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 3.2vw, 48px);
+      font-weight: 700; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .pricing-header p { font-size: 16px; color: var(--sub); max-width: 520px; line-height: 1.72; }
+
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .price-card {
+      background: var(--white); padding: 36px 32px;
+      position: relative;
+    }
+    .price-card.featured { background: var(--forest); }
+    .featured-badge {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      background: var(--teal-bright); color: var(--forest);
+      font-size: 9px; font-weight: 800;
+      padding: 4px 14px; border-radius: 0 0 6px 6px;
+      letter-spacing: 0.07em; text-transform: uppercase;
+    }
+    .price-tier {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px; padding-top: 14px;
+    }
+    .price-card.featured .price-tier { color: rgba(255,255,255,0.35); }
+    .price-amount { margin-bottom: 14px; line-height: 1; }
+    .price-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 44px; font-weight: 700;
+      letter-spacing: -0.03em; color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .price-card.featured .price-num { color: #fff; }
+    .price-period { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .price-card.featured .price-period { color: rgba(255,255,255,0.35); }
+    .price-desc { font-size: 14px; color: var(--sub); line-height: 1.6; margin-bottom: 22px; min-height: 52px; }
+    .price-card.featured .price-desc { color: rgba(255,255,255,0.5); }
+    hr.pd { border: none; border-top: 1px solid var(--border); margin-bottom: 18px; }
+    .price-card.featured hr.pd { border-color: rgba(255,255,255,0.1); }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 26px; }
+    .price-features li { font-size: 13px; color: var(--sub); display: flex; gap: 10px; align-items: flex-start; }
+    .price-card.featured .price-features li { color: rgba(255,255,255,0.55); }
+    .price-features li::before { content: '—'; color: var(--muted); flex-shrink: 0; font-size: 13px; }
+    .price-card.featured .price-features li::before { color: rgba(255,255,255,0.2); }
+    .price-cta {
+      display: block; text-align: center;
+      padding: 12px; border-radius: 4px;
+      font-size: 14px; font-weight: 700;
+      text-decoration: none; transition: all 0.18s;
+    }
+    .price-cta.prim { background: var(--teal-bright); color: var(--forest); }
+    .price-cta.prim:hover { background: #4fd1b8; }
+    .price-cta.sec { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .price-cta.sec:hover { background: var(--border); }
+    .pricing-note { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .pricing-note a { color: var(--teal); text-decoration: none; font-weight: 600; }
+
+    .addon-bar {
+      display: flex; align-items: center; gap: 18px;
+      background: var(--white); border: 1px solid var(--border);
+      padding: 18px 22px;
+    }
+    .addon-icon {
+      width: 38px; height: 38px; background: var(--teal-lt);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .addon-icon svg { width: 18px; height: 18px; stroke: var(--teal); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .addon-body { flex: 1; }
+    .addon-body h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .addon-body p { font-size: 13px; color: var(--sub); }
+    .addon-price { text-align: right; flex-shrink: 0; }
+    .addon-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.02em;
+    }
+    .addon-period { font-size: 11px; color: var(--muted); }
+
+    /* ══════════════════════════════════════
+       SECTORS STRIP
+    ══════════════════════════════════════ */
+    .sectors-section {
+      background: var(--white); padding: 64px 0;
+      border-top: 1px solid var(--border);
+    }
+    .sectors-inner { display: flex; align-items: center; gap: 0; }
+    .sectors-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); white-space: nowrap;
+      padding-right: 32px; border-right: 1px solid var(--border); margin-right: 32px;
+      flex-shrink: 0;
+    }
+    .sectors-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+      background: var(--border); border: 1px solid var(--border); flex: 1;
+    }
+    .sector-item { background: var(--white); padding: 22px 18px; }
+    .sector-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px;
+      letter-spacing: -0.02em;
+    }
+    .sector-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+    .sector-tag {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal);
+    }
+    .sector-tag.roadmap { color: var(--muted); }
+
+    /* ══════════════════════════════════════
+       CTA
+    ══════════════════════════════════════ */
+    .cta-section {
+      background: var(--forest);
+      padding: 112px 0;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+    }
+    .cta-inner {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px; align-items: center;
+    }
+    .cta-left h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(32px, 4vw, 56px);
+      font-weight: 700; letter-spacing: -0.03em;
+      color: #fff; line-height: 1.05; margin-bottom: 20px;
+    }
+    .cta-left h2 em { font-style: normal; color: var(--teal-bright); }
+    .cta-left p { font-size: 16px; color: rgba(255,255,255,0.55); line-height: 1.72; }
+    .cta-right {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .cta-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 20px 22px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .cta-item-icon {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: rgba(94,234,212,0.12);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cta-item-icon svg { width: 15px; height: 15px; stroke: var(--teal-bright); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .cta-item-body h4 { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 3px; letter-spacing: -0.02em; }
+    .cta-item-body p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.55; }
+    .cta-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    footer {
+      background: #071c14;
+      padding: 60px 0 40px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr 1fr 1fr;
+      gap: 48px; margin-bottom: 48px;
+    }
+    .footer-brand { }
+    .footer-mark { height: 40px; width: 40px; display: block; object-fit: contain; margin-bottom: 10px; }
+    .footer-wordmark {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px; font-weight: 700;
+      color: rgba(255,255,255,0.8); letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+    .footer-tagline { font-size: 12px; color: rgba(255,255,255,0.3); line-height: 1.6; }
+    .footer-col-title {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin-bottom: 16px;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a {
+      font-size: 13px; color: rgba(255,255,255,0.5);
+      text-decoration: none; transition: color 0.14s;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.88); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .footer-legal { font-size: 12px; color: rgba(255,255,255,0.25); }
+    .footer-langs { display: flex; gap: 14px; }
+    .footer-langs a { font-size: 12px; color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.14s; }
+    .footer-langs a:hover { color: rgba(255,255,255,0.7); }
+
+    /* ══════════════════════════════════════
+       SECTION LABEL SYSTEM
+    ══════════════════════════════════════ */
+    .sec-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 16px;
+    }
+    .sec-num {
+      font-size: 11px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.1em;
+      font-variant-numeric: tabular-nums;
+    }
+    .sec-num-dark { color: rgba(255,255,255,0.25); }
+    .sec-rule { flex: 1; height: 1px; background: var(--border); }
+    .sec-rule-dark { background: rgba(255,255,255,0.1); }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero::before { display: none; }
+      .hero-right { display: none; }
+      .hero-strip { grid-template-columns: 1fr; gap: 12px; }
+      .hero-strip-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 0 0 12px; }
+      .hero-strip-item:last-child { border-bottom: none; }
+      .problem-top { grid-template-columns: 1fr; gap: 24px; }
+      .evo-header, .evo-row { grid-template-columns: 24px 80px 1fr; }
+      .evo-hdr-label:last-child, .evo-desc { display: none; }
+      .states-layout { grid-template-columns: 1fr; }
+      .corpus-panel { position: static; }
+      .states-header { grid-template-columns: 1fr; }
+      .step-row { grid-template-columns: 40px 1fr; }
+      .step-title { grid-column: 2 / 3; }
+      .step-desc, .step-detail { grid-column: 1 / 3; }
+      .features-layout { grid-template-columns: 1fr; gap: 32px; }
+      .channels-rows .channel-row { grid-template-columns: 80px 1fr; }
+      .channel-row .ch-desc, .channel-row .ch-badge { grid-column: 1 / 3; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .sectors-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .cta-inner { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .state-row-inner { grid-template-columns: 1fr; }
+      .state-signal { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .sectors-grid { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .gaps-split { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal] { opacity: 1; clip-path: none; transform: none; transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <img src="Nuraimark.png" alt="Nurai mark" class="nav-mark" />
+        <span class="nav-wordmark">Nurai</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#states" data-en="How It Works" data-th="วิธีการทำงาน">How It Works</a></li>
+        <li><a href="#channels" data-en="Channels" data-th="ช่องทาง">Channels</a></li>
+        <li><a href="#pricing" data-en="Pricing" data-th="ราคา">Pricing</a></li>
+        <li><a href="#sectors" data-en="Sectors" data-th="อุตสาหกรรม">Sectors</a></li>
+      </ul>
+      <div class="nav-right">
+        <div class="lang-toggle">
+          <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" id="btn-th" onclick="setLang('th')">TH</button>
+        </div>
+        <a href="#cta" class="btn btn-teal" style="padding: 9px 20px; font-size: 13px;" data-en="Book a Pilot" data-th="จองการทดลองใช้">Book a Pilot</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       HERO — 01
+  ══════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-index" data-reveal>
+        <span data-en="Institutional Intelligence — 01" data-th="ปัญญาองค์กร — 01">Institutional Intelligence — 01</span>
+      </div>
+
+      <h1 data-reveal data-reveal-d="1"
+          data-en="Your organisation<br />already knows.<br /><em>Nurai surfaces it.</em>"
+          data-th="องค์กรของคุณ<br />มีความรู้อยู่แล้ว<br /><em>Nurai ดึงมันออกมา</em>">
+        Your organisation<br />already knows.<br />
+        <em>Nurai surfaces it.</em>
+      </h1>
+
+      <p class="hero-sub" data-reveal data-reveal-d="2"
+         data-en="Nurai transforms your documents, policies, and institutional memory into a <strong>verifiable knowledge layer</strong> — deployed natively on WhatsApp, LINE, and the web. Every answer is cited. Every gap is logged."
+         data-th="Nurai แปลงเอกสาร นโยบาย และความรู้องค์กรของคุณให้เป็น <strong>ชั้นความรู้ที่ตรวจสอบได้</strong> — ใช้งานโดยตรงบน WhatsApp, LINE และเว็บ ทุกคำตอบมีการอ้างอิง ทุกช่องว่างถูกบันทึก">
+        Nurai transforms your documents, policies, and institutional memory into a
+        <strong>verifiable knowledge layer</strong> — deployed natively on WhatsApp,
+        LINE, and the web. Every answer is cited. Every gap is logged.
+      </p>
+
+      <div class="hero-ctas" data-reveal data-reveal-d="3">
+        <a href="#cta" class="btn btn-white" data-en="Book a Pilot →" data-th="จองการทดลองใช้ →">Book a Pilot &rarr;</a>
+        <a href="#states" class="btn btn-ghost" data-en="See How It Works" data-th="ดูวิธีการทำงาน">See How It Works</a>
+      </div>
+
+      <div class="hero-strip" data-reveal data-reveal-d="4">
+        <div class="hero-strip-item">
+          <div class="hs-value" data-en="Every answer cited" data-th="ทุกคำตอบมีการอ้างอิง">Every answer cited</div>
+          <div class="hs-label" data-en="Linked to source document" data-th="เชื่อมโยงกับเอกสารต้นฉบับ">Linked to source document</div>
+        </div>
+        <div class="hero-strip-item">
+          <div class="hs-value" data-en="WhatsApp &amp; LINE native" data-th="ใช้งานบน WhatsApp &amp; LINE">WhatsApp &amp; LINE native</div>
+          <div class="hs-label" data-en="No app install required" data-th="ไม่ต้องติดตั้งแอปเพิ่มเติม">No app install required</div>
+        </div>
+        <div class="hero-strip-item">
+          <div class="hs-value" data-en="Gaps logged, not invented" data-th="บันทึกช่องว่าง ไม่สร้างข้อมูลเท็จ">Gaps logged, not invented</div>
+          <div class="hs-label" data-en="Three-state transparency model" data-th="โมเดลความโปร่งใส 3 สถานะ">Three-state transparency model</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="chat-device" data-reveal data-reveal-d="2">
+        <!-- WhatsApp-style topbar -->
+        <div class="chat-topbar">
+          <div class="chat-back">
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M9 1L1 8l8 7" stroke="rgba(255,255,255,0.7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="chat-avatar">N</div>
+          <div class="chat-info">
+            <div class="chat-name">Nurai Advisor</div>
+            <div class="chat-status">Online</div>
+          </div>
+          <div class="chat-menu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.5" fill="rgba(255,255,255,0.65)"/><circle cx="12" cy="12" r="1.5" fill="rgba(255,255,255,0.65)"/><circle cx="12" cy="19" r="1.5" fill="rgba(255,255,255,0.65)"/></svg>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-body">
+          <div class="bubble out">
+            What is the leave entitlement for contract staff?
+            <div class="btime">
+              09:14
+              <svg width="14" height="9" viewBox="0 0 14 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="#34B7F1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4.5l3 3 5-6.5" stroke="#34B7F1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+
+          <div class="bubble in">
+            Contract staff on agreements of 3+ months are entitled to
+            <strong>7 days annual leave</strong> per completed year of service,
+            pro-rated for partial years.
+            <div class="cite">
+              HR Policy Manual §4.2 — Contract Employment Terms (updated Jan 2025)
+            </div>
+            <span class="bbadge bbadge-r">Retrieved</span>
+            <div class="btime">09:14</div>
+          </div>
+
+          <div class="bubble out">
+            What about remote work policy for contractors?
+            <div class="btime">09:15
+              <svg width="14" height="9" viewBox="0 0 14 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="#8696A0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4.5l3 3 5-6.5" stroke="#8696A0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+
+          <div class="bubble in">
+            No policy covering remote work for contractors was found in the current knowledge base.
+            <span class="bbadge bbadge-g">Knowledge Gap</span>
+            <div class="btime">09:15</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PROBLEM — 02
+  ══════════════════════════════════════ -->
+  <section class="problem-section" id="problem">
+    <div class="wrap">
+      <div style="position: relative;">
+        <span class="sec-ghost">02</span>
+
+        <div class="sec-header" data-reveal>
+          <span class="sec-num t-label" data-en="02 — The Problem" data-th="02 — ปัญหา">02 — The Problem</span>
+          <div class="sec-rule"></div>
+        </div>
+
+        <div class="problem-top">
+          <h2 class="t-headline" data-reveal data-reveal-d="1"
+              data-en="The knowledge is there.<br />The retrieval is broken."
+              data-th="ความรู้มีอยู่แล้ว<br />แต่การค้นหาพังทลาย">
+            The knowledge is there.<br />The retrieval is broken.
+          </h2>
+          <p data-reveal data-reveal-d="2"
+             data-en="Organisations accumulate deep institutional knowledge over years — in manuals, meeting notes, policies, and email threads. The gap is not the content. It is the structured, auditable path from question to verified answer."
+             data-th="องค์กรสะสมความรู้เชิงสถาบันอย่างลึกซึ้งมาหลายปี — ในคู่มือ บันทึกการประชุม นโยบาย และเธรดอีเมล ช่องว่างไม่ใช่เนื้อหา แต่คือเส้นทางที่มีโครงสร้างและตรวจสอบได้จากคำถามสู่คำตอบที่ยืนยันแล้ว">
+            Organisations accumulate deep institutional knowledge over years — in manuals,
+            meeting notes, policies, and email threads. The gap is not the content.
+            It is the structured, auditable path from question to verified answer.
+          </p>
+        </div>
+
+        <!-- Evolution table -->
+        <div data-reveal>
+          <div class="evo-header">
+            <div class="evo-hdr-label"></div>
+            <div class="evo-hdr-label">Era</div>
+            <div class="evo-hdr-label">Approach</div>
+            <div class="evo-hdr-label">Limitation</div>
+          </div>
+          <div class="evo-row">
+            <div class="evo-row-n">1</div>
+            <div class="evo-era">Pre-2015</div>
+            <div class="evo-name">Static FAQs &amp; intranets</div>
+            <div class="evo-desc">No retrieval. Staff search manually or ask a colleague.</div>
+          </div>
+          <div class="evo-row">
+            <div class="evo-row-n">2</div>
+            <div class="evo-era">2015–2020</div>
+            <div class="evo-name">Keyword search + chatbots</div>
+            <div class="evo-desc">Rigid flows. Cannot handle novel questions or nuance.</div>
+          </div>
+          <div class="evo-row">
+            <div class="evo-row-n">3</div>
+            <div class="evo-era">2020–2023</div>
+            <div class="evo-name">Generic LLMs</div>
+            <div class="evo-desc">Fluent answers, no citations, high hallucination risk.</div>
+          </div>
+          <div class="evo-row">
+            <div class="evo-row-n">4</div>
+            <div class="evo-era">Now</div>
+            <div class="evo-name">Nurai — Institutional Intelligence <span class="evo-now">Current</span></div>
+            <div class="evo-desc">RAG-grounded. Cited. Auditable. Gap-aware.</div>
+          </div>
+        </div>
+
+        <!-- Two gaps -->
+        <div class="gaps-split" data-reveal>
+          <div class="gap-col">
+            <div class="gap-n">Gap 01</div>
+            <h3>Hallucination risk in ungrounded AI</h3>
+            <p>Generic LLMs generate plausible-sounding answers that are not anchored to your actual documents. In regulated or high-stakes contexts, that is a liability, not a feature.</p>
+            <div class="gap-proof">Nurai: every claim linked to a source chunk. No source, no claim.</div>
+          </div>
+          <div class="gap-col">
+            <div class="gap-n">Gap 02</div>
+            <h3>Invisible knowledge gaps</h3>
+            <p>When a question cannot be answered, most systems either fabricate or fail silently. Neither tells you what your corpus is missing.</p>
+            <div class="gap-proof">Nurai: unanswerable queries become a logged Gap Queue — actionable, not invisible.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       THREE STATES — 03
+  ══════════════════════════════════════ -->
+  <section class="states-section" id="states">
+    <div class="wrap">
+      <div style="position: relative;">
+        <span class="sec-ghost">03</span>
+
+        <div class="sec-header" data-reveal>
+          <span class="sec-num t-label" data-en="03 — The Knowledge Model" data-th="03 — โมเดลความรู้">03 — The Knowledge Model</span>
+          <div class="sec-rule"></div>
+        </div>
+
+        <div class="states-header">
+          <h2 class="t-headline" data-reveal data-reveal-d="1"
+              data-en="Three states.<br />Every answer classified."
+              data-th="สาม​สถานะ<br />ทุกคำตอบถูกจัดประเภท">
+            Three states.<br />Every answer classified.
+          </h2>
+          <p data-reveal data-reveal-d="2"
+             data-en="Nurai does not treat all answers as equal. Every response is classified into one of three transparent states — so users always know what they are getting, and managers always know what is missing."
+             data-th="Nurai ไม่ถือว่าคำตอบทุกข้อเท่ากัน ทุกการตอบสนองถูกจัดประเภทเป็นหนึ่งในสามสถานะโปร่งใส — เพื่อให้ผู้ใช้รู้เสมอว่าได้รับอะไร และผู้จัดการรู้เสมอว่าขาดอะไร">
+            Nurai does not treat all answers as equal. Every response is classified into one
+            of three transparent states — so users always know what they are getting, and
+            managers always know what is missing.
+          </p>
+        </div>
+
+        <div class="states-layout">
+          <!-- Index rows -->
+          <div class="state-rows">
+            <!-- Retrieved -->
+            <div class="state-row" data-reveal>
+              <div class="state-index t-mono">01</div>
+              <div class="state-row-inner">
+                <div>
+                  <span class="state-badge badge-r">Retrieved</span>
+                  <h3 class="state-content" style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:8px;line-height:1.3;margin-top:12px;">Direct match from corpus</h3>
+                </div>
+                <div class="state-content">
+                  <p>The answer was found verbatim or near-verbatim in the indexed knowledge base. The response includes the exact source document and section reference, making it fully auditable.</p>
+                </div>
+                <div class="state-signal">
+                  <p class="sig-r">
+                    Source linked — no interpretation added. Confidence above retrieval threshold.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Synthesised -->
+            <div class="state-row" data-reveal data-reveal-d="1">
+              <div class="state-index t-mono">02</div>
+              <div class="state-row-inner">
+                <div>
+                  <span class="state-badge badge-s">Synthesised</span>
+                  <h3 class="state-content" style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:8px;line-height:1.3;margin-top:12px;">Reasoned across multiple sources</h3>
+                </div>
+                <div class="state-content">
+                  <p>The answer draws on multiple chunks from different documents. The model connects them explicitly, not by assumption. All contributing sources are listed.</p>
+                </div>
+                <div class="state-signal">
+                  <p class="sig-s">
+                    Multi-source references listed. Reasoning is transparent and traceable.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Knowledge Gap -->
+            <div class="state-row" data-reveal data-reveal-d="2">
+              <div class="state-index t-mono">03</div>
+              <div class="state-row-inner">
+                <div>
+                  <span class="state-badge badge-g">Knowledge Gap</span>
+                  <h3 class="state-content" style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;letter-spacing:-0.02em;color:var(--text);margin-bottom:8px;line-height:1.3;margin-top:12px;">Not in corpus — logged, not invented</h3>
+                </div>
+                <div class="state-content">
+                  <p>No relevant source was found above the confidence threshold. The user receives a transparent "not in our current knowledge base" response. The query is logged to the Gap Queue for content owners to act on.</p>
+                </div>
+                <div class="state-signal">
+                  <p class="sig-g">
+                    Query logged to Gap Queue. Ops team notified. Corpus can be updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Corpus health panel -->
+          <div class="corpus-panel" data-reveal data-reveal-d="1">
+            <div class="cp-bar">
+              <div>
+                <div class="cp-title">Corpus Health</div>
+                <div class="cp-sub">6 sources · Last synced 4 min ago</div>
+              </div>
+              <div class="live-dot">Live</div>
+            </div>
+            <div class="cp-body">
+              <div class="cp-row">
+                <div class="cp-hdr">Source</div>
+                <div class="cp-hdr">Docs</div>
+                <div class="cp-hdr">Synced</div>
+                <div class="cp-hdr">Status</div>
+              </div>
+              <div class="cp-row">
+                <div><div class="cp-name">HR Policy Manual</div><div class="cp-type">Google Drive</div></div>
+                <div class="cp-docs">48</div>
+                <div class="cp-upd">4 min</div>
+                <div class="cp-ok">Synced</div>
+              </div>
+              <div class="cp-row">
+                <div><div class="cp-name">Benefits Guide 2025</div><div class="cp-type">File Upload</div></div>
+                <div class="cp-docs">12</div>
+                <div class="cp-upd">1 hr</div>
+                <div class="cp-ok">Synced</div>
+              </div>
+              <div class="cp-row">
+                <div><div class="cp-name">IT Security Policy</div><div class="cp-type">OneDrive</div></div>
+                <div class="cp-docs">31</div>
+                <div class="cp-upd">2 hr</div>
+                <div class="cp-ok">Synced</div>
+              </div>
+              <div class="cp-row">
+                <div><div class="cp-name">Remote Work SOP</div><div class="cp-type">File Upload</div></div>
+                <div class="cp-docs">0</div>
+                <div class="cp-upd">—</div>
+                <div class="cp-gap-st">Gap</div>
+              </div>
+            </div>
+            <div class="cp-gaps">
+              <div class="cp-gap-lbl">Gap Queue — 3 open</div>
+              <div class="cp-gap-item">
+                <div class="cp-gap-txt">Remote work for contractors</div>
+                <div class="cp-gap-badge">7 asks</div>
+              </div>
+              <div class="cp-gap-item">
+                <div class="cp-gap-txt">Parental leave extension rules</div>
+                <div class="cp-gap-badge">4 asks</div>
+              </div>
+              <div class="cp-gap-item">
+                <div class="cp-gap-txt">Overtime threshold definition</div>
+                <div class="cp-gap-badge">2 asks</div>
+              </div>
+            </div>
+            <div class="cp-cov">
+              <div class="cp-cov-row">
+                <span>Corpus coverage</span>
+                <span class="cp-cov-pct">84%</span>
+              </div>
+              <div class="cp-cov-bar"><div class="cp-cov-fill" style="width:84%"></div></div>
+              <div class="cp-cov-row"><span style="font-size:11px;color:var(--muted)">Estimated query coverage this week</span></div>
+            </div>
+            <div class="cp-actions">
+              <button class="cp-primary">Add to Corpus</button>
+              <button class="cp-secondary">View Queue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       HOW IT WORKS — 04
+  ══════════════════════════════════════ -->
+  <section class="how-section" id="how">
+    <div class="wrap">
+      <div style="position: relative;">
+        <span class="sec-ghost">04</span>
+
+        <div class="sec-header" data-reveal>
+          <span class="sec-num t-label" data-en="04 — Process" data-th="04 — กระบวนการ">04 — Process</span>
+          <div class="sec-rule"></div>
+        </div>
+
+        <div class="how-header">
+          <h2 class="t-headline" data-reveal data-reveal-d="1"
+              data-en="How Nurai works" data-th="Nurai ทำงานอย่างไร">How Nurai works</h2>
+          <p data-reveal data-reveal-d="2"
+             data-en="From document upload to cited answer — a transparent, auditable pipeline with no black-box steps."
+             data-th="จากการอัปโหลดเอกสารสู่คำตอบที่อ้างอิง — กระบวนการโปร่งใสและตรวจสอบได้ ไม่มีขั้นตอนที่ปิดบัง">From document upload to cited answer — a transparent, auditable pipeline with no black-box steps.</p>
+        </div>
+
+        <div class="steps-rows">
+          <div class="step-row" data-reveal>
+            <div class="step-n">01</div>
+            <div class="step-title">Connect your knowledge sources</div>
+            <div class="step-desc">Link Google Drive, OneDrive, Dropbox, or upload files directly. Nurai ingests PDFs, Word docs, spreadsheets, and web pages. Your corpus is version-controlled and auditable.</div>
+            <div class="step-detail"><strong>Supported:</strong> PDF, DOCX, XLSX, HTML, Notion, Confluence, email threads. Incremental sync every hour by default.</div>
+          </div>
+          <div class="step-row" data-reveal data-reveal-d="1">
+            <div class="step-n">02</div>
+            <div class="step-title">Deploy your Advisor to a channel</div>
+            <div class="step-desc">Each Advisor is configured with a persona, tone, language, and fallback behaviour. Deploy to WhatsApp, LINE, web embed, Slack, Teams, or API — or all simultaneously.</div>
+            <div class="step-detail"><strong>Modes:</strong> Internal staff advisor, external customer support, or hybrid. Channel permissions and audience scoping are set per Advisor.</div>
+          </div>
+          <div class="step-row" data-reveal data-reveal-d="2">
+            <div class="step-n">03</div>
+            <div class="step-title">Every query routes through the three-state model</div>
+            <div class="step-desc">RAG retrieval runs against your indexed corpus. Confidence scoring determines the response state. Retrieved, Synthesised, or Knowledge Gap — every answer is classified and logged.</div>
+            <div class="step-detail"><strong>Confidence threshold:</strong> Tunable per Advisor. Knowledge Gaps are never fabricated — they are logged and surfaced to your content team.</div>
+          </div>
+        </div>
+
+        <!-- Flow diagram -->
+        <div class="flow-wrap" data-reveal>
+          <div class="flow-col">
+            <div class="flow-lbl">Sources</div>
+            <div class="flow-sources">
+              <div class="flow-src">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="stroke:var(--teal);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Google Drive
+              </div>
+              <div class="flow-src">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="stroke:var(--teal);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                OneDrive / SP
+              </div>
+              <div class="flow-src">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="stroke:var(--teal);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                File Upload
+              </div>
+              <div class="flow-src">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="stroke:var(--teal);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                Website / URL
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-arrow">
+            <svg class="arrow-svg" viewBox="0 0 80 2" fill="none"><line x1="0" y1="1" x2="70" y2="1" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M74 1L70 4M74 1L70-2" stroke="#D1D5DB" stroke-width="1.5"/></svg>
+          </div>
+
+          <div class="flow-engine">
+            <img src="Nuraimark.png" alt="Nurai" class="flow-engine-mark" />
+            <div class="flow-engine-name">Nurai Engine</div>
+            <div class="flow-engine-sub">RAG · Chunk · Score · Classify</div>
+          </div>
+
+          <div class="flow-arrow">
+            <svg class="arrow-svg" viewBox="0 0 80 2" fill="none"><line x1="0" y1="1" x2="70" y2="1" stroke="#D1D5DB" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M74 1L70 4M74 1L70-2" stroke="#D1D5DB" stroke-width="1.5"/></svg>
+          </div>
+
+          <div class="flow-col">
+            <div class="flow-lbl">Response States</div>
+            <div class="flow-outputs">
+              <div class="flow-out flow-out-r"><div class="fo-dot" style="background:#22c55e"></div>Retrieved</div>
+              <div class="flow-out flow-out-s"><div class="fo-dot" style="background:#1d4ed8"></div>Synthesised</div>
+              <div class="flow-out flow-out-g"><div class="fo-dot" style="background:var(--amber)"></div>Knowledge Gap</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FEATURES — 05 (dark)
+  ══════════════════════════════════════ -->
+  <section class="features-section" id="features">
+    <div class="wrap">
+      <div style="position: relative;">
+        <span class="sec-ghost sec-ghost-light">05</span>
+
+        <div class="sec-header" data-reveal>
+          <span class="sec-num t-label sec-num-dark" data-en="05 — Capabilities" data-th="05 — ความสามารถ">05 — Capabilities</span>
+          <div class="sec-rule sec-rule-dark"></div>
+        </div>
+
+        <div class="features-header">
+          <h2 class="t-headline" data-reveal data-reveal-d="1"
+              data-en="Built for institutional<br />deployment at scale"
+              data-th="สร้างมาเพื่อการใช้งาน<br />ระดับองค์กรในวงกว้าง">
+            Built for institutional<br />deployment at scale
+          </h2>
+          <p data-reveal data-reveal-d="2"
+             data-en="Nurai is not a generic chatbot. It is a governed knowledge infrastructure designed for organisations where accuracy, auditability, and access control are non-negotiable."
+             data-th="Nurai ไม่ใช่แชทบอททั่วไป แต่เป็นโครงสร้างพื้นฐานความรู้ที่มีการกำกับดูแล ออกแบบมาสำหรับองค์กรที่ความแม่นยำ การตรวจสอบ และการควบคุมการเข้าถึงเป็นสิ่งที่ต้องการ">
+            Nurai is not a generic chatbot. It is a governed knowledge infrastructure designed for organisations where accuracy, auditability, and access control are non-negotiable.
+          </p>
+        </div>
+
+        <div class="features-layout">
+          <!-- Feature list -->
+          <div class="feat-list">
+            <div class="feat-item" data-reveal>
+              <div class="feat-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              </div>
+              <div class="feat-body">
+                <h3>Cited retrieval — always</h3>
+                <p>Every Retrieved or Synthesised answer includes the exact source document, section, and update date. Compliance teams can audit any conversation end-to-end.</p>
+              </div>
+            </div>
+            <div class="feat-item" data-reveal data-reveal-d="1">
+              <div class="feat-icon">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              </div>
+              <div class="feat-body">
+                <h3>Role-based access control</h3>
+                <p>Each Advisor can be scoped to internal staff, external users, or specific departments. Sensitive documents are restricted at the corpus level, not the prompt level.</p>
+              </div>
+            </div>
+            <div class="feat-item" data-reveal data-reveal-d="2">
+              <div class="feat-icon">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </div>
+              <div class="feat-body">
+                <h3>Gap Queue and corpus analytics</h3>
+                <p>Unanswerable questions are automatically logged with frequency counts. Content owners see exactly what to document next, closing the knowledge loop over time.</p>
+              </div>
+            </div>
+            <div class="feat-item" data-reveal data-reveal-d="3">
+              <div class="feat-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              </div>
+              <div class="feat-body">
+                <h3>Multi-language support</h3>
+                <p>Advisors can be configured per language. Thai, English, and regional variants supported. Automatic language detection routes queries without user configuration.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Value spec table -->
+          <div>
+            <div class="value-table" data-reveal>
+              <div class="vt-row">
+                <div class="vt-cell">
+                  <div class="vt-when">Use case</div>
+                  <div class="vt-anchor">HR <em>&amp;</em><br />People Ops</div>
+                  <h3>Staff policy advisor</h3>
+                  <p>Answer leave, payroll, and benefits questions 24/7. Reduce HR inbox volume by routing routine queries to a verified, citable source.</p>
+                  <ul class="vt-bullets">
+                    <li>Policy documents as the single source of truth</li>
+                    <li>Audit trail for every query answered</li>
+                    <li>Escalation to HR when gap detected</li>
+                  </ul>
+                </div>
+                <div class="vt-cell">
+                  <div class="vt-when">Use case</div>
+                  <div class="vt-anchor">Legal <em>&amp;</em><br />Compliance</div>
+                  <h3>Regulatory knowledge base</h3>
+                  <p>Distribute regulatory updates and compliance requirements without relying on one-off email chains. Every answer is version-controlled.</p>
+                  <ul class="vt-bullets">
+                    <li>Regulation changes reflected on next sync</li>
+                    <li>No fabricated compliance guidance</li>
+                    <li>Full retrieval log for audit</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       CHANNELS — 06
+  ══════════════════════════════════════ -->
+  <section class="channels-section" id="channels">
+    <div class="wrap">
+      <div style="position: relative;">
+        <span class="sec-ghost">06</span>
+
+        <div class="sec-header" data-reveal>
+          <span class="sec-num t-label" data-en="06 — Channels" data-th="06 — ช่องทาง">06 — Channels</span>
+          <div class="sec-rule"></div>
+        </div>
+
+        <div class="channels-header">
+          <h2 class="t-headline" data-reveal data-reveal-d="1"
+              data-en="Meet your users<br />where they already are"
+              data-th="พบผู้ใช้ของคุณ<br />ในแพลตฟอร์มที่พวกเขาใช้อยู่">
+            Meet your users<br />where they already are
+          </h2>
+          <p data-reveal data-reveal-d="2"
+             data-en="Nurai deploys on the platforms your staff and customers already use — no new app, no onboarding friction. One Advisor can serve multiple channels simultaneously."
+             data-th="Nurai ใช้งานบนแพลตฟอร์มที่พนักงานและลูกค้าของคุณใช้อยู่แล้ว — ไม่ต้องติดตั้งแอปใหม่ ไม่มีความยุ่งยากในการเริ่มต้น Advisor เดียวสามารถให้บริการหลายช่องทางพร้อมกัน">
+            Nurai deploys on the platforms your staff and customers already use — no new app, no onboarding friction. One Advisor can serve multiple channels simultaneously.
+          </p>
+        </div>
+
+        <div class="channels-rows" data-reveal>
+          <!-- WhatsApp -->
+          <div class="channel-row">
+            <div class="ch-logo-wrap">
+              <img src="WhatsApp-Logo.wine.png" alt="WhatsApp" class="ch-logo" />
+            </div>
+            <div class="ch-name">WhatsApp</div>
+            <div class="ch-desc">Native WhatsApp Cloud API integration. Users message your official business number — no QR code, no install. Supports rich text, citations, and escalation flows.</div>
+            <span class="ch-badge badge-wa">Native</span>
+          </div>
+
+          <!-- LINE -->
+          <div class="channel-row">
+            <div class="ch-logo-wrap">
+              <img src="Line_(software)-Logo.wine.png" alt="LINE" class="ch-logo" />
+            </div>
+            <div class="ch-name">LINE</div>
+            <div class="ch-desc">Full LINE Messaging API integration, including Official Account support. Preferred channel for Thai enterprise and retail deployments. Rich card and flex message support.</div>
+            <span class="ch-badge badge-line">Native</span>
+          </div>
+
+          <!-- Web -->
+          <div class="channel-row">
+            <div class="ch-logo-wrap">
+              <div class="ch-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              </div>
+            </div>
+            <div class="ch-name">Web Chat &amp; Embed</div>
+            <div class="ch-desc">Deploy as a standalone web chat or embed as a widget on any internal portal or public website. Fully customisable styling with single-line script install.</div>
+            <span class="ch-badge badge-web">Embed</span>
+          </div>
+
+          <!-- Slack / Teams -->
+          <div class="channel-row">
+            <div class="ch-logo-wrap" style="gap:10px;display:flex;align-items:center;">
+              <img src="Slack_Technologies-Mark-Logo.wine.png" alt="Slack" class="ch-logo" style="height:28px;" />
+              <img src="Microsoft_Teams-Logo.wine.png" alt="Microsoft Teams" class="ch-logo" style="height:28px;" />
+            </div>
+            <div class="ch-name">Slack &amp; Microsoft Teams</div>
+            <div class="ch-desc">Install as a workspace app or bot. Staff can @mention the Advisor directly in channels or DMs. Answers include source links and gap escalation notifications.</div>
+            <span class="ch-badge badge-ent">Enterprise</span>
+          </div>
+
+          <!-- Email -->
+          <div class="channel-row">
+            <div class="ch-logo-wrap">
+              <div class="ch-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+            </div>
+            <div class="ch-name">Email (async)</div>
+            <div class="ch-desc">Route incoming email queries to the Advisor for triage. Replies include citations and escalate unanswerable queries to the appropriate team inbox. High-volume queue supported.</div>
+            <span class="ch-badge badge-async">Async</span>
+          </div>
+
+          <!-- API -->
+          <div class="channel-row">
+            <div class="ch-logo-wrap">
+              <div class="ch-icon">
+                <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+            </div>
+            <div class="ch-name">REST API</div>
+            <div class="ch-desc">Integrate Nurai's retrieval layer into any internal system — CRM, HRIS, ERP, or custom workflows. Full JSON responses with state classification, source refs, and confidence scores.</div>
+            <span class="ch-badge badge-api">Developer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       PRICING — 07
+  ══════════════════════════════════════ -->
+  <section class="pricing-section" id="pricing">
+    <div class="wrap">
+      <div style="position: relative;">
+        <span class="sec-ghost">07</span>
+
+        <div class="sec-header" data-reveal>
+          <span class="sec-num t-label" data-en="07 — Pricing" data-th="07 — ราคา">07 — Pricing</span>
+          <div class="sec-rule"></div>
+        </div>
+
+        <div class="pricing-header">
+          <h2 class="t-headline" data-reveal data-reveal-d="1"
+              data-en="Transparent, predictable pricing"
+              data-th="ราคาโปร่งใส คาดเดาได้">Transparent, predictable pricing</h2>
+          <p data-reveal data-reveal-d="2"
+             data-en="All plans include the three-state model, source citations, and gap logging. Higher tiers unlock more Advisors, larger corpora, and enterprise governance controls."
+             data-th="ทุกแผนรวมโมเดลสามสถานะ การอ้างอิงแหล่งที่มา และการบันทึกช่องว่าง แผนระดับสูงขึ้นเปิดใช้งาน Advisor เพิ่มขึ้น ฐานข้อมูลขนาดใหญ่ขึ้น และการควบคุมระดับองค์กร">
+            All plans include the three-state model, source citations, and gap logging. Higher tiers unlock more Advisors, larger corpora, and enterprise governance controls.
+          </p>
+        </div>
+
+        <div class="pricing-grid" data-reveal>
+          <!-- Starter -->
+          <div class="price-card">
+            <div class="price-tier">Starter</div>
+            <div class="price-amount">
+              <span class="price-num">$149</span>
+              <span class="price-period"> / month</span>
+            </div>
+            <p class="price-desc" data-en="One Advisor, one channel, up to 50 source documents. Ideal for a single department pilot." data-th="1 Advisor, 1 ช่องทาง, ฐานข้อมูลสูงสุด 50 เอกสาร เหมาะสำหรับนำร่องในแผนกเดียว">One Advisor, one channel, up to 50 source documents. Ideal for a single department pilot.</p>
+            <hr class="pd" />
+            <ul class="price-features">
+              <li>1 Advisor, 1 channel</li>
+              <li>Up to 50 documents</li>
+              <li>Three-state classification</li>
+              <li>Source citations in every answer</li>
+              <li>Gap Queue with frequency counts</li>
+              <li>Web dashboard &amp; analytics</li>
+            </ul>
+            <a href="#cta" class="price-cta sec">Start Pilot</a>
+          </div>
+
+          <!-- Growth (featured) -->
+          <div class="price-card featured">
+            <div class="featured-badge">Most Popular</div>
+            <div class="price-tier">Growth</div>
+            <div class="price-amount">
+              <span class="price-num">$449</span>
+              <span class="price-period"> / month</span>
+            </div>
+            <p class="price-desc" data-en="Up to 5 Advisors, all channels, 500 documents. The right tier for multi-department rollout." data-th="สูงสุด 5 Advisor, ทุกช่องทาง, 500 เอกสาร เหมาะสำหรับการขยายหลายแผนก">Up to 5 Advisors, all channels, 500 documents. The right tier for multi-department rollout.</p>
+            <hr class="pd" />
+            <ul class="price-features">
+              <li>5 Advisors, all channels</li>
+              <li>Up to 500 documents</li>
+              <li>WhatsApp &amp; LINE native</li>
+              <li>Role-based access control</li>
+              <li>Confidence threshold tuning</li>
+              <li>Priority support</li>
+            </ul>
+            <a href="#cta" class="price-cta prim">Book a Pilot</a>
+          </div>
+
+          <!-- Enterprise -->
+          <div class="price-card">
+            <div class="price-tier">Enterprise</div>
+            <div class="price-amount">
+              <span class="price-num">Custom</span>
+            </div>
+            <p class="price-desc">Unlimited Advisors, unlimited documents, on-premise option, SLA, and dedicated success manager.</p>
+            <hr class="pd" />
+            <ul class="price-features">
+              <li>Unlimited Advisors &amp; documents</li>
+              <li>On-premise or private cloud</li>
+              <li>Custom LLM or model override</li>
+              <li>SSO / SAML integration</li>
+              <li>Dedicated success manager</li>
+              <li>Custom SLA</li>
+            </ul>
+            <a href="#cta" class="price-cta sec">Talk to Sales</a>
+          </div>
+        </div>
+
+        <p class="pricing-note" data-reveal>All prices exclude VAT. Annual billing available at 15% discount. <a href="#cta">Contact us</a> for academic or NGO pricing.</p>
+
+        <div class="addon-bar" data-reveal data-reveal-d="1">
+          <div class="addon-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="addon-body">
+            <h4>Human Takeover Add-on</h4>
+            <p>Live agent routing with conversation hand-off. Staff receive full context including the triggering Knowledge Gap query. Available on Growth and Enterprise.</p>
+          </div>
+          <div class="addon-price">
+            <div class="addon-num">$89</div>
+            <div class="addon-period">/ month add-on</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECTORS STRIP ── -->
+  <section class="sectors-section" id="sectors">
+    <div class="wrap">
+      <div class="sectors-inner">
+        <div class="sectors-label">Sectors</div>
+        <div class="sectors-grid">
+          <div class="sector-item">
+            <div class="sector-name">Financial Services</div>
+            <div class="sector-desc">Regulatory queries, product terms, compliance guidance.</div>
+            <div class="sector-tag">Available</div>
+          </div>
+          <div class="sector-item">
+            <div class="sector-name">Human Resources</div>
+            <div class="sector-desc">Policy, benefits, leave, and payroll self-service.</div>
+            <div class="sector-tag">Available</div>
+          </div>
+          <div class="sector-item">
+            <div class="sector-name">Legal &amp; Compliance</div>
+            <div class="sector-desc">Regulatory knowledge bases and audit trails.</div>
+            <div class="sector-tag">Available</div>
+          </div>
+          <div class="sector-item">
+            <div class="sector-name">Healthcare</div>
+            <div class="sector-desc">Protocol retrieval and patient information guidance.</div>
+            <div class="sector-tag roadmap">2025 Roadmap</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       CTA — 08
+  ══════════════════════════════════════ -->
+  <section class="cta-section" id="cta">
+    <div class="wrap">
+      <div class="sec-header" style="margin-bottom:48px;" data-reveal>
+        <span class="sec-num t-label sec-num-dark">08 — Get Started</span>
+        <div class="sec-rule sec-rule-dark"></div>
+      </div>
+      <div class="cta-inner">
+        <div class="cta-left" data-reveal>
+          <h2 data-en="Ready to surface what<br />your organisation <em>already knows?</em>"
+              data-th="พร้อมดึงความรู้ที่<br />องค์กรของคุณ<em>มีอยู่แล้ว?</em>">Ready to surface what<br />your organisation <em>already knows?</em></h2>
+          <p data-en="We run a structured 30-day pilot — live corpus, real channel, measured gap reduction. Most teams see query coverage above 80% before the pilot ends."
+             data-th="เราดำเนินการทดลองใช้ 30 วันแบบมีโครงสร้าง — ฐานข้อมูลจริง ช่องทางจริง วัดการลดช่องว่างได้จริง ทีมส่วนใหญ่เห็นความครอบคลุมการสอบถามเกิน 80% ก่อนสิ้นสุดการทดลอง">We run a structured 30-day pilot — live corpus, real channel, measured gap reduction. Most teams see query coverage above 80% before the pilot ends.</p>
+          <div class="cta-btns">
+            <a href="mailto:hello@axianurai.com" class="btn btn-white" data-en="Book a Pilot →" data-th="จองการทดลองใช้ →">Book a Pilot &rarr;</a>
+            <a href="mailto:hello@axianurai.com" class="btn btn-ghost" data-en="Talk to Sales" data-th="พูดคุยกับทีมขาย">Talk to Sales</a>
+          </div>
+        </div>
+        <div class="cta-right" data-reveal data-reveal-d="1">
+          <div class="cta-item">
+            <div class="cta-item-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="cta-item-body">
+              <h4>30-day live pilot</h4>
+              <p>Real corpus, real channel, real staff queries. Measurable corpus coverage and gap reduction by day 30.</p>
+            </div>
+          </div>
+          <div class="cta-item">
+            <div class="cta-item-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="cta-item-body">
+              <h4>No fabricated answers</h4>
+              <p>Knowledge Gaps are declared and logged, not invented. Your compliance and legal teams can verify every response end-to-end.</p>
+            </div>
+          </div>
+          <div class="cta-item">
+            <div class="cta-item-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="cta-item-body">
+              <h4>Deployed in days, not months</h4>
+              <p>Connect your drive, configure your Advisor, go live on WhatsApp or LINE within a week. No integration sprint required.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="Nuraimark.png" alt="Nurai" class="footer-mark" />
+          <div class="footer-wordmark">Nurai</div>
+          <div class="footer-tagline">Institutional Intelligence Infrastructure by Axia Nurai</div>
+        </div>
+        <div>
+          <div class="footer-col-title">Product</div>
+          <ul class="footer-links">
+            <li><a href="#states">How It Works</a></li>
+            <li><a href="#features">Capabilities</a></li>
+            <li><a href="#channels">Channels</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Company</div>
+          <ul class="footer-links">
+            <li><a href="#">About Axia Nurai</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="mailto:hello@axianurai.com">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal</div>
+          <ul class="footer-links">
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Data Processing Agreement</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-legal">&copy; 2025 Axia Nurai Co., Ltd. All rights reserved.</div>
+        <div class="footer-langs">
+          <a href="#">English</a>
+          <a href="#">ภาษาไทย</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── LANGUAGE SWITCHING ──
+    let currentLang = localStorage.getItem('nurai-lang') || 'en';
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('nurai-lang', lang);
+
+      // Toggle button states
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('btn-th').classList.toggle('active', lang === 'th');
+
+      // Update html lang attribute
+      document.documentElement.lang = lang === 'th' ? 'th' : 'en';
+
+      // Update all elements with data-en / data-th
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const val = el.getAttribute('data-' + lang);
+        if (!val) return;
+        // For elements that contain HTML (headings with <br>, <em>, <strong>)
+        const tag = el.tagName.toLowerCase();
+        if (['h1','h2','h3','h4','h5','p','span','a','div'].includes(tag)) {
+          el.innerHTML = val;
+        } else {
+          el.textContent = val;
+        }
+      });
+
+      // Pricing period label adapts
+      document.querySelectorAll('.price-period').forEach(el => {
+        el.textContent = lang === 'th' ? ' / เดือน' : ' / month';
+      });
+      document.querySelectorAll('.addon-period').forEach(el => {
+        el.textContent = lang === 'th' ? '/ เดือน (เสริม)' : '/ month add-on';
+      });
+
+      // Pricing note
+      const pnote = document.querySelector('.pricing-note');
+      if (pnote) {
+        pnote.innerHTML = lang === 'th'
+          ? 'ราคาไม่รวม VAT มีส่วนลด 15% สำหรับการชำระรายปี <a href="#cta">ติดต่อเรา</a> สำหรับราคาองค์กรการศึกษาหรือ NGO'
+          : 'All prices exclude VAT. Annual billing available at 15% discount. <a href="#cta">Contact us</a> for academic or NGO pricing.';
+      }
+
+      // Footer tagline
+      const ftag = document.querySelector('.footer-tagline');
+      if (ftag) {
+        ftag.textContent = lang === 'th'
+          ? 'โครงสร้างพื้นฐานปัญญาองค์กร โดย Axia Nurai'
+          : 'Institutional Intelligence Infrastructure by Axia Nurai';
+      }
+
+      // Footer copyright
+      const fleg = document.querySelector('.footer-legal');
+      if (fleg) {
+        fleg.textContent = lang === 'th'
+          ? '© 2025 Axia Nurai Co., Ltd. สงวนลิขสิทธิ์'
+          : '© 2025 Axia Nurai Co., Ltd. All rights reserved.';
+      }
+    }
+
+    // Apply saved language on load
+    setLang(currentLang);
+
+    // ── SCROLL REVEAL ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+
+    // ── NAV SHADOW ON SCROLL ──
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      nav.style.boxShadow = window.scrollY > 20
+        ? '0 1px 0 rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06)'
+        : 'none';
+    }, { passive: true });
+  </script>
+</body>
+</html>
