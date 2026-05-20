@@ -314,9 +314,15 @@
     }
     .cite {
       font-size: 11px;
-      background: #f0fdf4; border-left: 3px solid #0D6E5A;
-      padding: 6px 9px; margin-top: 7px; border-radius: 0 4px 4px 0;
+      background: #e8f5f1;
+      padding: 6px 10px; margin-top: 7px; border-radius: 4px;
       color: #065F46;
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .cite::before {
+      content: '§';
+      font-weight: 700; color: #0D6E5A;
+      font-size: 11px; flex-shrink: 0; margin-top: 0;
     }
     .bbadge {
       font-size: 10px; padding: 2px 8px; border-radius: 3px;
@@ -657,9 +663,9 @@
       border: 1px solid var(--border);
       white-space: nowrap;
     }
-    .flow-out-r { border-left: 3px solid #22c55e; }
-    .flow-out-s { border-left: 3px solid var(--blue); }
-    .flow-out-g { border-left: 3px solid var(--amber); }
+    .flow-out-r { }
+    .flow-out-s { }
+    .flow-out-g { }
     .fo-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .flow-arrow {
       flex: 1; min-width: 60px;
@@ -1040,7 +1046,13 @@
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; }
       .hero::before { display: none; }
-      .hero-right { display: none; }
+      .hero-right {
+        display: flex;
+        padding: 0 var(--pad) 56px;
+        justify-content: center;
+      }
+      .hero-right .chat-device { max-width: 300px; }
+      .hero-right .chat-body { min-height: 240px; }
       .hero-strip { grid-template-columns: 1fr; gap: 12px; }
       .hero-strip-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 0 0 12px; }
       .hero-strip-item:last-child { border-bottom: none; }
@@ -1097,7 +1109,7 @@
           <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
           <button class="lang-btn" id="btn-th" onclick="setLang('th')">TH</button>
         </div>
-        <a href="#cta" class="btn btn-teal" style="padding: 9px 20px; font-size: 13px;" data-en="Book a Pilot" data-th="จองการทดลองใช้">Book a Pilot</a>
+        <a href="#cta" class="btn btn-teal" style="padding: 9px 20px; font-size: 13px; font-family: 'Inter', sans-serif;" data-en="Book a Pilot" data-th="จองการทดลองใช้">Book a Pilot</a>
       </div>
     </div>
   </nav>
@@ -1112,10 +1124,10 @@
       </div>
 
       <h1 data-reveal data-reveal-d="1"
-          data-en="Your organisation<br />already knows.<br /><em>Nurai surfaces it.</em>"
-          data-th="องค์กรของคุณ<br />มีความรู้อยู่แล้ว<br /><em>Nurai ดึงมันออกมา</em>">
-        Your organisation<br />already knows.<br />
-        <em>Nurai surfaces it.</em>
+          data-en="Your staff ask.<br />Your docs answer.<br /><em>Nurai connects them.</em>"
+          data-th="พนักงานถาม<br />เอกสารตอบ<br /><em>Nurai เชื่อมทั้งสอง</em>">
+        Your staff ask.<br />Your docs answer.<br />
+        <em>Nurai connects them.</em>
       </h1>
 
       <p class="hero-sub" data-reveal data-reveal-d="2"
@@ -1127,8 +1139,8 @@
       </p>
 
       <div class="hero-ctas" data-reveal data-reveal-d="3">
-        <a href="#cta" class="btn btn-white" data-en="Book a Pilot →" data-th="จองการทดลองใช้ →">Book a Pilot &rarr;</a>
-        <a href="#states" class="btn btn-ghost" data-en="See How It Works" data-th="ดูวิธีการทำงาน">See How It Works</a>
+        <a href="#states" class="btn btn-white" data-en="See How It Works →" data-th="ดูวิธีการทำงาน →">See How It Works &rarr;</a>
+        <a href="#cta" class="btn btn-ghost" data-en="Book a Pilot" data-th="จองการทดลองใช้">Book a Pilot</a>
       </div>
 
       <div class="hero-strip" data-reveal data-reveal-d="4">
