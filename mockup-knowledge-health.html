@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Corpus Health · Nurai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:      #0D6E5A;
+      --teal-dk:   #0a5a49;
+      --teal-lt:   #E8F5F1;
+      --teal-mid:  #1D9E75;
+      --forest:    #0A3D2E;
+      --amber:     #EF9F27;
+      --amber-lt:  #FFFBEB;
+      --amber-dk:  #92400E;
+      --red:       #E24B4A;
+      --red-lt:    #FEF2F2;
+      --green:     #22c55e;
+      --green-lt:  #F0FDF4;
+      --text:      #111827;
+      --sub:       #374151;
+      --muted:     #6B7280;
+      --faint:     #9CA3AF;
+      --border:    #E5E7EB;
+      --surface:   #F9FAFB;
+      --bg:        #F3F4F6;
+    }
+
+    html { font-size: 14px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #F0F0EE;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* ── Layout chrome ── */
+    .shell {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      grid-column: 1 / -1;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      z-index: 10;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+    .topbar-mark {
+      width: 28px;
+      height: 28px;
+      background: var(--teal);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .topbar-divider { width: 1px; height: 20px; background: var(--border); }
+    .topbar-section {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar-section .sep { color: var(--faint); }
+    .topbar-section .current { color: var(--text); font-weight: 500; }
+
+    /* Sidebar */
+    .sidebar {
+      background: white;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 0;
+      overflow: hidden;
+    }
+    .sidebar-section-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faint);
+      padding: 0 16px;
+      margin-bottom: 4px;
+      margin-top: 12px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      font-size: 13px;
+      color: var(--sub);
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.12s;
+      text-decoration: none;
+    }
+    .nav-item.active {
+      background: var(--teal-lt);
+      color: var(--teal);
+      font-weight: 500;
+    }
+    .nav-item:not(.active):hover { background: var(--surface); }
+    .nav-item .mi { font-size: 18px; line-height: 1; }
+
+    /* Main content */
+    .main {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    /* ─────────────────────────────────────────────
+       SECTION A: Advisor Cards with health dot
+    ───────────────────────────────────────────── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 20px 24px 12px;
+      border-bottom: 1px solid var(--border);
+      background: white;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 20px 24px;
+    }
+
+    /* AdvisorCard */
+    .advisor-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 220px;
+      position: relative;
+      transition: box-shadow 0.15s;
+    }
+    .advisor-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+    /* ── Health dot variants ── */
+    /* Option 1: Corner dot (absolute) */
+    .health-corner {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid white;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .health-corner.green  { background: #22c55e; }
+    .health-corner.amber  { background: #f59e0b; }
+    .health-corner.gray   { background: #D1D5DB; }
+    .health-corner.red    { background: #EF4444; }
+
+    /* Option 2: Badge-integrated (in the "Active Xd" pill) */
+    .health-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .health-badge.green {
+      background: var(--green-lt);
+      border: 1px solid #BBF7D0;
+      color: #166534;
+    }
+    .health-badge.amber {
+      background: var(--amber-lt);
+      border: 1px solid #FDE68A;
+      color: var(--amber-dk);
+    }
+    .health-badge.gray {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .health-badge.red {
+      background: var(--red-lt);
+      border: 1px solid #FECACA;
+      color: #991B1B;
+    }
+    .health-dot-sm {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .health-dot-sm.green  { background: #16a34a; }
+    .health-dot-sm.amber  { background: #d97706; }
+    .health-dot-sm.gray   { background: #9CA3AF; }
+    .health-dot-sm.red    { background: #dc2626; }
+
+    .card-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .status-pill.live { background: #DCFCE7; color: #166534; }
+    .status-pill.live::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
+    .status-pill.draft { background: var(--bg); color: var(--muted); }
+    .status-pill.draft::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #D1D5DB; }
+    .status-pill.test { background: #EFF6FF; color: #1d4ed8; }
+    .status-pill.test::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #60a5fa; }
+
+    .card-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .card-meta-txt { font-size: 11px; color: var(--muted); }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+    .chip-purple { background: #EDE9FE; color: #6D28D9; }
+    .chip-green  { background: #D1FAE5; color: #065F46; }
+    .chip-amber  { background: #FEF3C7; color: #92400E; }
+
+    .card-channels { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+    .ch-icon { font-size: 18px; line-height: 1; color: var(--teal); }
+    .ch-icon.dim { opacity: 0.2; }
+
+    .card-stats {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      flex: 1;
+    }
+    .card-stat-txt { font-size: 11px; color: var(--muted); }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid #F3F4F6;
+      gap: 0;
+      divide-style: solid;
+    }
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--sub);
+      padding: 0 8px;
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .card-cta:first-child { padding-left: 0; }
+    .card-cta:last-child { border-right: none; }
+    .card-cta:hover { color: var(--text); }
+    .card-cta .mi { font-size: 13px; color: var(--faint); }
+
+    /* Controls label */
+    .option-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--faint);
+      background: #FFFBE6;
+      border: 1px dashed #FDE68A;
+      border-radius: 4px;
+      padding: 2px 7px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION B: Knowledge page redesign
+    ───────────────────────────────────────────── */
+    .kb-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .kb-header {
+      padding: 20px 24px 0;
+      background: white;
+      border-bottom: 1px solid var(--border);
+    }
+    .kb-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .kb-title { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; margin-bottom: 2px; }
+    .kb-sub { font-size: 12px; color: var(--faint); }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-primary:hover { background: var(--teal-dk); }
+
+    /* Tabs */
+    .kb-tabs {
+      display: flex;
+      gap: 0;
+    }
+    .kb-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.12s;
+    }
+    .kb-tab.active { color: var(--teal); border-color: var(--teal); }
+    .kb-tab:not(.active):hover { color: var(--text); }
+    .badge-amber-sm {
+      background: #FEF3C7;
+      color: #92400E;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+
+    /* Main content area */
+    .kb-content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      padding: 20px 24px;
+      gap: 16px;
+    }
+
+    /* Left: advisor sidebar */
+    .kb-advisor-sidebar {
+      width: 180px;
+      flex-shrink: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .kb-advisor-hdr {
+      padding: 10px 14px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      border-bottom: 1px solid var(--border);
+    }
+    .kb-advisor-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+    .kb-advisor-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .kb-advisor-item.active { background: var(--teal-lt); }
+    .kb-advisor-item:not(.active):hover { background: var(--surface); }
+    .advisor-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .kb-advisor-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--sub);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .kb-advisor-item.active .kb-advisor-name { color: var(--teal); }
+    .health-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .health-dot.green { background: var(--teal-mid); }
+    .health-dot.amber { background: #f59e0b; }
+    .health-dot.gray  { background: #D1D5DB; }
+    .health-dot.red   { background: #EF4444; }
+
+    /* Center: source list */
+    .kb-library {
+      flex: 1;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .kb-lib-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .kb-lib-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+    .kb-lib-stats { font-size: 11px; color: var(--faint); }
+    .btn-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      border: none;
+    }
+    .btn-sm.primary { background: var(--teal); color: white; }
+    .btn-sm.secondary { background: white; color: var(--sub); border: 1px solid var(--border); }
+
+    .kb-lib-body { flex: 1; overflow-y: auto; padding: 4px 0; }
+
+    .src-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #F3F4F6;
+      transition: background 0.1s;
+      position: relative;
+    }
+    .src-row:hover { background: var(--surface); }
+    .src-row:last-child { border-bottom: none; }
+
+    .src-edge {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 0;
+    }
+    .src-edge.high   { background: var(--teal-mid); }
+    .src-edge.medium { background: var(--amber); }
+    .src-edge.low    { background: #D1D5DB; }
+    .src-edge.unused { background: var(--red); }
+
+    .src-icon { font-size: 16px; color: var(--faint); flex-shrink: 0; }
+    .src-info { flex: 1; min-width: 0; }
+    .src-name { font-size: 12px; font-weight: 500; color: var(--text); truncate; }
+    .src-type { font-size: 10px; color: var(--faint); }
+    .usage-pill {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .usage-pill.high   { background: #E1F5EE; color: #085041; }
+    .usage-pill.medium { background: #FAEEDA; color: #633806; }
+    .usage-pill.low    { background: #F1EFE8; color: #5F5E5A; }
+    .usage-pill.unused { background: #FCEBEB; color: #A32D2D; }
+    .src-age { font-size: 10px; color: var(--faint); width: 52px; text-align: right; }
+    .status-dot {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    .status-dot.synced { color: #166534; background: #DCFCE7; }
+    .status-dot.error  { color: #991B1B; background: #FEE2E2; }
+    .status-dot.gap    { color: #92400E; background: #FEF3C7; }
+
+    /* ── Corpus Health Panel (right) ── */
+    .kb-health-panel {
+      width: 260px;
+      flex-shrink: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      max-height: 100%;
+    }
+    .hp-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hp-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .hp-sub { font-size: 10px; color: var(--faint); margin-top: 1px; }
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #16a34a;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Source table */
+    .hp-table { padding: 0; }
+    .hp-row {
+      display: grid;
+      grid-template-columns: 1fr 28px 50px 44px;
+      gap: 4px;
+      align-items: center;
+      padding: 7px 14px;
+      border-bottom: 1px solid #F3F4F6;
+      font-size: 11px;
+    }
+    .hp-row:last-child { border-bottom: none; }
+    .hp-row-hdr { font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); }
+    .hp-src-name { font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hp-src-type { font-size: 10px; color: var(--faint); }
+    .hp-docs { font-weight: 600; color: var(--text); text-align: center; }
+    .hp-upd { color: var(--faint); font-size: 10px; }
+    .hp-ok   { font-size: 10px; font-weight: 700; color: #16a34a; }
+    .hp-gap  { font-size: 10px; font-weight: 700; color: var(--red); }
+
+    /* Gap queue */
+    .hp-gap-zone {
+      background: #FFFBEB;
+      border-top: 1px solid #FDE68A;
+      padding: 10px 14px;
+    }
+    .hp-gap-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber-dk);
+      margin-bottom: 7px;
+    }
+    .hp-gap-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+    .hp-gap-row:last-child { margin-bottom: 0; }
+    .hp-gap-txt { font-size: 11px; color: var(--text); font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hp-gap-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--amber-dk);
+      background: #FDE68A;
+      padding: 1px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* Coverage bar */
+    .hp-coverage {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .hp-cov-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--faint); margin-bottom: 5px; }
+    .hp-cov-pct { font-weight: 700; color: var(--teal); }
+    .hp-bar { height: 3px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+    .hp-fill { height: 100%; background: var(--teal); border-radius: 99px; }
+
+    /* CTA buttons */
+    .hp-actions {
+      display: flex;
+      gap: 6px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .hp-btn-primary {
+      flex: 1;
+      padding: 7px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+    }
+    .hp-btn-primary:hover { background: var(--teal-dk); }
+    .hp-btn-secondary {
+      padding: 7px 10px;
+      background: white;
+      color: var(--sub);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .hp-btn-secondary:hover { background: var(--surface); }
+
+    /* ── Divider between sections ── */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 24px;
+    }
+
+    .annotation {
+      background: #FFFBE6;
+      border: 1px solid #FDE68A;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 11px;
+      color: #78350F;
+      line-height: 1.5;
+    }
+    .annotation strong { font-weight: 700; }
+
+    /* scrollbar styling */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<div style="max-width:1100px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:32px;">
+
+  <!-- ══════════════════════════════════════════
+       SECTION A — AdvisorCard health indicator
+  ════════════════════════════════════════════ -->
+  <div>
+    <div style="margin-bottom:16px;">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Section A — AdvisorCard health indicator</p>
+      <p style="font-size:12px;color:var(--muted);max-width:640px;">Two design options shown side by side. <strong>Option 1</strong> adds a small absolute-positioned dot in the card corner. <strong>Option 2</strong> integrates health into the existing "Active Xd" badge — same element, richer signal.</p>
+    </div>
+
+    <div class="card-grid">
+
+      <!-- Card 1: Option 1 — Corner dot (green) -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="option-label">Option 1 — Corner dot</div>
+        <div class="advisor-card">
+          <div class="health-corner green" title="Corpus healthy — all sources synced"></div>
+          <div class="card-row1">
+            <span class="status-pill live">Live</span>
+            <div style="display:flex;gap:4px;">
+              <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;">edit</span>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--faint);cursor:pointer;">more_vert</span>
+            </div>
+          </div>
+          <p class="card-name">HR Policy Advisor</p>
+          <div class="card-meta">
+            <span class="card-meta-txt">Operations</span>
+            <span class="chip chip-purple">Internal</span>
+            <span class="chip chip-amber">Formal</span>
+          </div>
+          <div class="card-channels">
+            <span class="material-symbols-outlined ch-icon" title="Web">language</span>
+            <svg class="ch-icon" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            <svg class="ch-icon dim" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="#06C755"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.30-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            <span class="material-symbols-outlined ch-icon dim">mail</span>
+            <span class="material-symbols-outlined ch-icon dim">code</span>
+          </div>
+          <div class="card-stats">
+            <span class="health-badge green"><span class="health-dot-sm green"></span>Active 3mo</span>
+            <span class="card-stat-txt">48 conversations · 2h ago</span>
+          </div>
+          <div class="card-footer">
+            <a class="card-cta"><span class="material-symbols-outlined mi">forum</span>Inbox</a>
+            <a class="card-cta"><span class="material-symbols-outlined mi">chat</span>Chat</a>
+            <a class="card-cta"><span class="material-symbols-outlined mi">science</span>Test</a>
+          </div>
+        </div>
+        <div class="annotation">
+          <strong>Verdict:</strong> The dot sits outside the content flow. Easy to miss. Doesn't tell you <em>what</em> is wrong without hovering.
+        </div>
+      </div>
+
+      <!-- Card 2: Option 2 — Integrated badge (amber, with gap info) -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="option-label">Option 2 — Badge-integrated (recommended)</div>
+        <div class="advisor-card">
+          <div class="card-row1">
+            <span class="status-pill live">Live</span>
+            <div style="display:flex;gap:4px;">
+              <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;">edit</span>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--faint);cursor:pointer;">more_vert</span>
+            </div>
+          </div>
+          <p class="card-name">Compliance Knowledge Bot</p>
+          <div class="card-meta">
+            <span class="card-meta-txt">Research</span>
+            <span class="chip chip-green">Customer-facing</span>
+          </div>
+          <div class="card-channels">
+            <span class="material-symbols-outlined ch-icon">language</span>
+            <svg class="ch-icon dim" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            <svg class="ch-icon dim" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="#06C755"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.628-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            <span class="material-symbols-outlined ch-icon dim">mail</span>
+            <span class="material-symbols-outlined ch-icon dim">code</span>
+          </div>
+          <div class="card-stats">
+            <!-- The badge itself changes color/text based on health -->
+            <span class="health-badge amber" title="3 knowledge gaps open · 1 source unused">
+              <span class="health-dot-sm amber"></span>Active 6mo · 3 gaps
+            </span>
+            <span class="card-stat-txt">12 conversations</span>
+          </div>
+          <div class="card-footer">
+            <a class="card-cta"><span class="material-symbols-outlined mi">forum</span>Inbox</a>
+            <a class="card-cta"><span class="material-symbols-outlined mi">chat</span>Chat</a>
+            <a class="card-cta"><span class="material-symbols-outlined mi">science</span>Test</a>
+          </div>
+        </div>
+        <div class="annotation">
+          <strong>Verdict:</strong> The badge already exists, already carries a time signal. Enriching it with corpus health state adds information without adding UI surface. The gap count becomes a direct call to action — click through to the knowledge page.
+        </div>
+      </div>
+
+      <!-- Card 3: Option 2 — gray state (no sources) -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="option-label">Option 2 — No sources state</div>
+        <div class="advisor-card">
+          <div class="card-row1">
+            <span class="status-pill draft">Draft</span>
+            <div style="display:flex;gap:4px;">
+              <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;">edit</span>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--faint);cursor:pointer;">more_vert</span>
+            </div>
+          </div>
+          <p class="card-name">Sales Enablement Bot</p>
+          <div class="card-meta">
+            <span class="card-meta-txt italic" style="color:var(--faint);">Setup not complete</span>
+          </div>
+          <div class="card-channels">
+            <span class="material-symbols-outlined ch-icon dim">language</span>
+            <svg class="ch-icon dim" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            <svg class="ch-icon dim" style="width:18px;height:18px;" viewBox="0 0 24 24" fill="#06C755"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.628-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            <span class="material-symbols-outlined ch-icon dim">mail</span>
+            <span class="material-symbols-outlined ch-icon dim">code</span>
+          </div>
+          <div class="card-stats">
+            <span class="health-badge gray">
+              <span class="health-dot-sm gray"></span>No sources added
+            </span>
+            <span class="card-stat-txt">No conversations yet</span>
+          </div>
+          <div class="card-footer">
+            <a class="card-cta"><span class="material-symbols-outlined mi">forum</span>Inbox</a>
+            <a class="card-cta"><span class="material-symbols-outlined mi">chat</span>Chat</a>
+            <a class="card-cta"><span class="material-symbols-outlined mi">science</span>Test</a>
+          </div>
+        </div>
+        <div class="annotation">
+          <strong>Gray state:</strong> Replaces "Active Xd" with "No sources added" — a direct prompt to act. More useful than the age label for advisors with no corpus.
+        </div>
+      </div>
+
+    </div><!-- /card-grid -->
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECTION B — Knowledge page redesign
+  ════════════════════════════════════════════ -->
+  <div>
+    <div style="margin-bottom:16px;">
+      <p style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Section B — Knowledge page with Corpus Health panel</p>
+      <p style="font-size:12px;color:var(--muted);max-width:640px;">The library keeps its current structure (advisor sidebar + source list). The Corpus Health panel slots in as a sticky right column — same data from the existing API, new presentation.</p>
+    </div>
+
+    <!-- Simulated page shell -->
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+
+      <!-- Topbar -->
+      <div class="topbar" style="border-radius:10px 10px 0 0;">
+        <div class="topbar-brand">
+          <div class="topbar-mark">N</div>
+          Nurai
+        </div>
+        <div class="topbar-divider"></div>
+        <div class="topbar-section">
+          <span>Workspace</span>
+          <span class="sep">/</span>
+          <span class="current">Knowledge</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:180px 1fr;height:560px;">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-section-lbl">Workspace</div>
+          <a class="nav-item"><span class="material-symbols-outlined mi">dashboard</span>Dashboard</a>
+          <a class="nav-item"><span class="material-symbols-outlined mi">smart_toy</span>Advisors</a>
+          <a class="nav-item active"><span class="material-symbols-outlined mi">folder_open</span>Knowledge</a>
+          <a class="nav-item"><span class="material-symbols-outlined mi">forum</span>Conversations</a>
+          <a class="nav-item"><span class="material-symbols-outlined mi">bar_chart</span>Analytics</a>
+          <div class="sidebar-section-lbl" style="margin-top:auto;">Settings</div>
+          <a class="nav-item"><span class="material-symbols-outlined mi">settings</span>Settings</a>
+        </div>
+
+        <!-- Main content -->
+        <div class="kb-shell">
+          <!-- Page header + tabs -->
+          <div class="kb-header">
+            <div class="kb-title-row">
+              <div>
+                <p class="kb-title">Knowledge</p>
+                <p class="kb-sub">4 sources across 3 advisors · 1 unused</p>
+              </div>
+              <button class="btn-primary">
+                <span class="material-symbols-outlined" style="font-size:15px;">add</span>
+                Add Source
+              </button>
+            </div>
+
+            <!-- Gap queue banner -->
+            <div style="display:flex;align-items:center;gap:10px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:14px;cursor:pointer;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#FEF3C7;border:1px solid #FDE68A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:15px;color:#D97706;">pending</span>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:12px;font-weight:600;color:#78350F;">3 answers waiting for your review</p>
+                <p style="font-size:10px;color:#92400E;">Reviewed answers enter the corpus. Every approval makes the Advisor more complete.</p>
+              </div>
+              <span style="font-size:12px;font-weight:600;color:#D97706;flex-shrink:0;">Review now →</span>
+            </div>
+
+            <div class="kb-tabs">
+              <div class="kb-tab active">Library</div>
+              <div class="kb-tab">
+                Review queue
+                <span class="badge-amber-sm">3</span>
+              </div>
+              <div class="kb-tab">Connectors</div>
+            </div>
+          </div>
+
+          <!-- Tab content -->
+          <div class="kb-content">
+
+            <!-- Advisor sidebar -->
+            <div class="kb-advisor-sidebar">
+              <div class="kb-advisor-hdr">Advisors</div>
+              <div class="kb-advisor-list">
+
+                <div class="kb-advisor-item active">
+                  <div class="advisor-avatar" style="background:#9FE1CB;color:#085041;">HR</div>
+                  <span class="kb-advisor-name">HR Policy Advisor</span>
+                  <div class="health-dot green" title="Corpus healthy"></div>
+                </div>
+
+                <div class="kb-advisor-item">
+                  <div class="advisor-avatar" style="background:#CECBF6;color:#3C3489;">CO</div>
+                  <span class="kb-advisor-name">Compliance Bot</span>
+                  <div class="health-dot amber" title="3 gaps open, 1 source unused"></div>
+                </div>
+
+                <div class="kb-advisor-item">
+                  <div class="advisor-avatar" style="background:#FAC775;color:#633806;">SA</div>
+                  <span class="kb-advisor-name">Sales Enablement</span>
+                  <div class="health-dot gray" title="No sources added"></div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Source list -->
+            <div class="kb-library">
+              <div class="kb-lib-header">
+                <div class="advisor-avatar" style="background:#9FE1CB;color:#085041;width:22px;height:22px;font-size:9px;">HR</div>
+                <span class="kb-lib-name">HR Policy Advisor</span>
+                <span class="kb-lib-stats">4 sources · 287 retrievals / 30d</span>
+                <button class="btn-sm primary">
+                  <span class="material-symbols-outlined" style="font-size:13px;">add</span>
+                  Add source
+                </button>
+              </div>
+
+              <!-- Insight banner -->
+              <div style="display:flex;align-items:flex-start;gap:7px;background:#E8F5F1;border:1px solid #A7F3D0;margin:10px 12px 0;border-radius:6px;padding:8px 10px;">
+                <span class="material-symbols-outlined" style="font-size:14px;color:var(--teal);flex-shrink:0;margin-top:1px;">lightbulb</span>
+                <p style="font-size:11px;color:#085041;line-height:1.5;">HR Policy Manual and Benefits Guide account for 91% of retrievals. Remote Work SOP has 0 retrievals — may be redundant or mislabeled.</p>
+              </div>
+
+              <div class="kb-lib-body" style="padding-top:8px;">
+
+                <div class="src-row">
+                  <div class="src-edge high"></div>
+                  <span class="material-symbols-outlined src-icon">description</span>
+                  <div class="src-info">
+                    <div class="src-name">HR Policy Manual</div>
+                    <div class="src-type">Google Drive · 48 docs</div>
+                  </div>
+                  <span class="usage-pill high">High use · 194×</span>
+                  <span class="src-age">4 min</span>
+                  <span class="status-dot synced">Synced</span>
+                  <div style="display:flex;gap:4px;width:48px;justify-content:flex-end;">
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;opacity:0;">refresh</span>
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;opacity:0;">delete</span>
+                  </div>
+                </div>
+
+                <div class="src-row">
+                  <div class="src-edge high"></div>
+                  <span class="material-symbols-outlined src-icon">upload_file</span>
+                  <div class="src-info">
+                    <div class="src-name">Benefits Guide 2025</div>
+                    <div class="src-type">File Upload · 12 docs</div>
+                  </div>
+                  <span class="usage-pill high">High use · 68×</span>
+                  <span class="src-age">1 hr</span>
+                  <span class="status-dot synced">Synced</span>
+                  <div style="display:flex;gap:4px;width:48px;justify-content:flex-end;">
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;opacity:0;">refresh</span>
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;opacity:0;">delete</span>
+                  </div>
+                </div>
+
+                <div class="src-row">
+                  <div class="src-edge medium"></div>
+                  <span class="material-symbols-outlined src-icon">cloud</span>
+                  <div class="src-info">
+                    <div class="src-name">IT Security Policy</div>
+                    <div class="src-type">OneDrive · 31 docs</div>
+                  </div>
+                  <span class="usage-pill medium">Medium · 25×</span>
+                  <span class="src-age">2 hr</span>
+                  <span class="status-dot synced">Synced</span>
+                  <div style="display:flex;gap:4px;width:48px;justify-content:flex-end;">
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;opacity:0;">refresh</span>
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;opacity:0;">delete</span>
+                  </div>
+                </div>
+
+                <div class="src-row">
+                  <div class="src-edge unused"></div>
+                  <span class="material-symbols-outlined src-icon">upload_file</span>
+                  <div class="src-info">
+                    <div class="src-name">Remote Work SOP</div>
+                    <div class="src-type">File Upload · 0 docs</div>
+                  </div>
+                  <span class="usage-pill unused">Unused</span>
+                  <span class="src-age" style="color:#D97706;">—</span>
+                  <span class="status-dot gap">Gap</span>
+                  <div style="display:flex;gap:4px;width:48px;justify-content:flex-end;">
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;">refresh</span>
+                    <span class="material-symbols-outlined" style="font-size:15px;color:var(--faint);cursor:pointer;">delete</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Corpus Health Panel -->
+            <div class="kb-health-panel">
+              <div class="hp-topbar">
+                <div>
+                  <div class="hp-title">Corpus Health</div>
+                  <div class="hp-sub">4 sources · Last synced 4 min ago</div>
+                </div>
+                <div class="live-pill">
+                  <div class="live-dot"></div>
+                  Live
+                </div>
+              </div>
+
+              <!-- Source table -->
+              <div class="hp-table">
+                <div class="hp-row">
+                  <div class="hp-row-hdr">Source</div>
+                  <div class="hp-row-hdr" style="text-align:center;">Docs</div>
+                  <div class="hp-row-hdr">Synced</div>
+                  <div class="hp-row-hdr">Status</div>
+                </div>
+                <div class="hp-row">
+                  <div><div class="hp-src-name">HR Policy Manual</div><div class="hp-src-type">Google Drive</div></div>
+                  <div class="hp-docs">48</div>
+                  <div class="hp-upd">4 min</div>
+                  <div class="hp-ok">Synced</div>
+                </div>
+                <div class="hp-row">
+                  <div><div class="hp-src-name">Benefits Guide 2025</div><div class="hp-src-type">File Upload</div></div>
+                  <div class="hp-docs">12</div>
+                  <div class="hp-upd">1 hr</div>
+                  <div class="hp-ok">Synced</div>
+                </div>
+                <div class="hp-row">
+                  <div><div class="hp-src-name">IT Security Policy</div><div class="hp-src-type">OneDrive</div></div>
+                  <div class="hp-docs">31</div>
+                  <div class="hp-upd">2 hr</div>
+                  <div class="hp-ok">Synced</div>
+                </div>
+                <div class="hp-row">
+                  <div><div class="hp-src-name">Remote Work SOP</div><div class="hp-src-type">File Upload</div></div>
+                  <div class="hp-docs">0</div>
+                  <div class="hp-upd">—</div>
+                  <div class="hp-gap">Gap</div>
+                </div>
+              </div>
+
+              <!-- Gap queue -->
+              <div class="hp-gap-zone">
+                <div class="hp-gap-lbl">Gap Queue — 3 Open</div>
+                <div class="hp-gap-row">
+                  <span class="hp-gap-txt">Remote work for contractors</span>
+                  <span class="hp-gap-badge">7 asks</span>
+                </div>
+                <div class="hp-gap-row">
+                  <span class="hp-gap-txt">Parental leave extension rules</span>
+                  <span class="hp-gap-badge">4 asks</span>
+                </div>
+                <div class="hp-gap-row">
+                  <span class="hp-gap-txt">Overtime threshold definition</span>
+                  <span class="hp-gap-badge">2 asks</span>
+                </div>
+              </div>
+
+              <!-- Coverage bar -->
+              <div class="hp-coverage">
+                <div class="hp-cov-row">
+                  <span>Corpus coverage</span>
+                  <span class="hp-cov-pct">84%</span>
+                </div>
+                <div class="hp-bar">
+                  <div class="hp-fill" style="width:84%;"></div>
+                </div>
+                <div class="hp-cov-row" style="margin-top:4px;">
+                  <span>Estimated query coverage this week</span>
+                </div>
+              </div>
+
+              <!-- CTA -->
+              <div class="hp-actions">
+                <button class="hp-btn-primary">Add to Corpus</button>
+                <button class="hp-btn-secondary">View Queue</button>
+              </div>
+            </div>
+            <!-- /Corpus Health Panel -->
+
+          </div><!-- /kb-content -->
+        </div><!-- /kb-shell -->
+      </div><!-- /grid -->
+    </div><!-- /page shell -->
+  </div>
+
+</div><!-- /container -->
+
+</body>
+</html>
