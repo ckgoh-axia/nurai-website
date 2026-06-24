@@ -479,14 +479,51 @@ let editId = null;
 let pickColor = PALETTE[0];
 let currentType = 'task';
 
-// ─── Persist ───────────────────────────────────────────────────────────────
-const KEY = 'ms-tracker-v3';
-function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
-function load() {
-  try { const r = localStorage.getItem(KEY); if (r) { S = JSON.parse(r); } } catch(e) {}
-  // backfill type for old data
-  S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
-  if (!S.threads || !S.threads.length) seed();
+// ─── Shared persistence via JSONBin ───────────────────────────────────────
+// Usage: add ?bin=BIN_ID&key=MASTER_KEY to the URL
+// Get a free key at https://jsonbin.io — create one bin, share that URL.
+// Falls back to localStorage when no params are present.
+const _p    = new URLSearchParams(location.search);
+const _bin  = _p.get('bin');
+const _key  = _p.get('key');
+const _shared = !!(  _bin && _key);
+const _BASE = 'https://api.jsonbin.io/v3/b';
+
+let _saveTimer = null;
+function save() {
+  if (!_shared) { localStorage.setItem('ms-tracker-v3', JSON.stringify(S)); return; }
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    fetch(`${_BASE}/${_bin}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': _key },
+      body: JSON.stringify(S),
+    }).catch(() => {});
+  }, 800);
+}
+
+async function load() {
+  if (!_shared) {
+    try { const r = localStorage.getItem('ms-tracker-v3'); if (r) S = JSON.parse(r); } catch(e) {}
+    S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
+    if (!S.threads || !S.threads.length) seed();
+    render();
+    return;
+  }
+  document.title = '⧳ Loading…';
+  try {
+    const res = await fetch(`${_BASE}/${_bin}/latest`, {
+      headers: { 'X-Master-Key': _key },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      S = json.record;
+      S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
+      if (!S.threads || !S.threads.length) seed();
+    } else { seed(); }
+  } catch(e) { seed(); }
+  document.title = 'Milestone Tracker';
+  render();
 }
 function seed() {
   S.threads = [
@@ -942,7 +979,7 @@ document.addEventListener('keydown', e => {
 
 // ─── Init ──────────────────────────────────────────────────────────────────
 function render() { renderSidebar(); renderGantt(); }
-load(); render();
+load(); // async when shared — calls render() internally
 </script>
 </body>
 </html>
