@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milestone Tracker</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --muted: #718096;
+  --primary: #4f46e5;
+  --primary-h: #4338ca;
+  --danger: #ef4444;
+  --today: #f97316;
+  --label-w: 170px;
+  --hdr-h: 52px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+/* ── Toolbar ──────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.toolbar-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+}
+.toolbar-sep { flex: 1; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  line-height: 1.4;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-h); }
+.btn-secondary { background: #edf2f7; color: var(--text); }
+.btn-secondary:hover { background: #e2e8f0; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-danger { background: #fee2e2; color: var(--danger); border: none; }
+.btn-danger:hover { background: #fecaca; }
+.zoom-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.zoom-group button {
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.zoom-group button:last-child { border-right: none; }
+.zoom-group button.active { background: var(--primary); color: #fff; }
+.zoom-group button:hover:not(.active) { background: var(--bg); }
+
+/* ── Layout ───────────────────────────────── */
+.main { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+/* ── Sidebar ──────────────────────────────── */
+.sidebar {
+  width: 200px; min-width: 200px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-top {
+  padding: 10px 10px 6px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); margin-bottom: 5px;
+}
+.thread-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 3px; border-radius: 5px; cursor: default;
+}
+.thread-item:hover { background: var(--bg); }
+.tdot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.tname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.tdel { opacity: 0; font-size: 11px; color: var(--muted); cursor: pointer; padding: 1px 3px; border-radius: 3px; }
+.thread-item:hover .tdel { opacity: 1; }
+.tdel:hover { background: #fee2e2; color: var(--danger); }
+.tedit { opacity: 0; font-size: 12px; color: var(--muted); cursor: pointer; padding: 1px 3px; border-radius: 3px; margin-left: auto; }
+.thread-item:hover .tedit { opacity: 1; }
+.tedit:hover { background: #eef2ff; color: var(--primary); }
+.thread-item { cursor: pointer; }
+.drag-handle {
+  opacity: 0;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: grab;
+  padding: 0 2px;
+  letter-spacing: -1px;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
+}
+.thread-item:hover .drag-handle { opacity: 1; }
+.thread-item.drag-over {
+  border-top: 2px solid var(--primary);
+  margin-top: -2px;
+}
+.thread-item.dragging { opacity: 0.4; }
+.ms-list { flex: 1; overflow-y: auto; padding: 8px; }
+.ms-card {
+  padding: 7px 8px; border-radius: 6px;
+  border: 1px solid var(--border); margin-bottom: 5px;
+  cursor: pointer; transition: border-color .12s, box-shadow .12s;
+}
+.ms-card:hover { border-color: var(--primary); box-shadow: 0 1px 4px rgba(79,70,229,.12); }
+.ms-card-name { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
+.ms-card-meta { color: var(--muted); font-size: 10px; margin-top: 2px; }
+
+/* ── Chart ────────────────────────────────── */
+.chart-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.gantt-scroll { flex: 1; overflow: auto; }
+.gantt-empty { padding: 60px 20px; text-align: center; color: var(--muted); }
+.gantt-empty h3 { font-size: 15px; margin-bottom: 6px; }
+.gantt-empty p { font-size: 12px; }
+
+/* ── Gantt table ──────────────────────────── */
+.gantt-table { border-collapse: collapse; }
+.gantt-hdr-label {
+  background: #f8fafc;
+  border-bottom: 2px solid var(--border);
+  border-right: 1px solid var(--border);
+  position: sticky; left: 0; z-index: 25; top: 0;
+  padding: 0 12px; height: var(--hdr-h);
+  text-align: left; vertical-align: middle;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+}
+.gantt-hdr-tl {
+  background: #f8fafc;
+  border-bottom: 2px solid var(--border);
+  height: var(--hdr-h); padding: 0;
+  vertical-align: top; position: relative;
+}
+.gantt-cell-label {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  position: sticky; left: 0; z-index: 10;
+  vertical-align: middle; padding: 0 10px;
+  width: var(--label-w); min-width: var(--label-w);
+}
+.gantt-cell-label:hover { background: #f0f4ff; }
+.row-label-inner { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; }
+.gantt-cell-body {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0; position: relative; vertical-align: top;
+}
+.gantt-cell-body:hover { background: #f8f9ff; }
+
+/* ── Timeline elements ────────────────────── */
+.tl-wrap { position: relative; }
+.grid-line {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: var(--border); opacity: .55; pointer-events: none;
+}
+.month-bg {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(0,0,0,.018); pointer-events: none;
+}
+.today-line {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: var(--today); opacity: .8; z-index: 2; pointer-events: none;
+}
+.today-dot {
+  position: absolute; top: 4px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--today); transform: translateX(-3px); z-index: 3;
+}
+.tl-month {
+  position: absolute; top: 5px;
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em;
+  pointer-events: none; white-space: nowrap;
+}
+.tl-tick {
+  position: absolute; bottom: 4px; font-size: 9px; color: var(--muted);
+  transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+}
+
+/* ── Task bar ─────────────────────────────── */
+.ms-bar {
+  position: absolute;
+  height: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 0 1px 3px rgba(0,0,0,.14);
+  transition: opacity .1s, box-shadow .1s, transform .1s;
+}
+.ms-bar:hover { opacity: .88; box-shadow: 0 3px 8px rgba(0,0,0,.22); transform: translateY(-1px); }
+
+/* ── Milestone diamond ────────────────────── */
+.ms-diamond {
+  position: absolute;
+  width: 14px; height: 14px;
+  transform: rotate(45deg);
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 1px 1px 3px rgba(0,0,0,.18);
+  transition: opacity .1s, box-shadow .1s, transform .1s;
+  transform-origin: center;
+}
+.ms-diamond:hover { opacity: .85; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+/* hover scale without disturbing the 45deg rotation */
+.ms-diamond:hover { transform: rotate(45deg) scale(1.2); }
+
+/* ── Label ────────────────────────────────── */
+.ms-label {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 4;
+  line-height: 1;
+  text-shadow: 0 0 3px var(--surface), 0 0 3px var(--surface);
+}
+
+/* ── Modal ────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,15,20,.45);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.overlay.hide { display: none; }
+.modal {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 22px 24px 20px;
+  width: 100%; max-width: 430px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.22);
+  animation: modal-in .15s ease;
+}
+@keyframes modal-in { from { opacity:0; transform:scale(.97) } to { opacity:1; transform:scale(1) } }
+.modal h2 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+.field { margin-bottom: 12px; }
+.field label {
+  display: block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); margin-bottom: 4px;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 7px 9px;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface);
+  outline: none; transition: border-color .12s, box-shadow .12s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+.field textarea { resize: vertical; min-height: 55px; }
+.field-row { display: flex; gap: 8px; }
+.field-row .field { flex: 1; }
+.modal-actions { display: flex; gap: 7px; justify-content: flex-end; margin-top: 16px; }
+
+/* Type toggle */
+.type-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.type-btn {
+  flex: 1;
+  padding: 7px 0;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background .12s, color .12s;
+}
+.type-btn.active { background: var(--primary); color: #fff; }
+.type-btn:not(.active):hover { background: var(--bg); }
+
+/* Color picker */
+.color-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.cswatch {
+  width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: border-color .12s, transform .1s;
+}
+.cswatch.sel { border-color: #1a202c; transform: scale(1.18); }
+
+/* Diamond icon in sidebar */
+.diamond-icon {
+  display: inline-block;
+  width: 8px; height: 8px;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-title">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--primary)">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v6M15 3v6"/>
+    </svg>
+    Milestones
+  </div>
+  <button class="btn btn-primary" onclick="openMs()">+ Add</button>
+  <button class="btn btn-secondary" onclick="openThread()">+ Thread</button>
+  <div class="toolbar-sep"></div>
+  <div class="zoom-group">
+    <button onclick="setZoom('day')"     id="z-day">Day</button>
+    <button onclick="setZoom('week')"    id="z-week" class="active">Week</button>
+    <button onclick="setZoom('month')"   id="z-month">Month</button>
+    <button onclick="setZoom('quarter')" id="z-quarter">Quarter</button>
+  </div>
+  <button class="btn btn-ghost" onclick="scrollToday()">Today ◎</button>
+  <button class="btn btn-ghost" onclick="doExport()">↑ Share</button>
+  <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">↓ Import</button>
+  <input type="file" id="imp" accept=".json" style="display:none" onchange="doImport(event)">
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-label">Threads</div>
+      <div id="thread-list"></div>
+    </div>
+    <div class="ms-list" id="ms-list"></div>
+  </div>
+  <div class="chart-area">
+    <div class="gantt-scroll" id="gantt-scroll">
+      <div id="gantt-mount"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Milestone / Task Modal -->
+<div class="overlay hide" id="ms-modal">
+  <div class="modal">
+    <h2 id="ms-modal-title">Add Item</h2>
+
+    <!-- Type toggle -->
+    <div class="type-toggle">
+      <button class="type-btn active" id="type-task" onclick="setType('task')">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 12 12"><rect x="0" y="4" width="12" height="4" rx="2"/></svg>
+        Duration task
+      </button>
+      <button class="type-btn" id="type-milestone" onclick="setType('milestone')">
+        <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" transform="rotate(45 5 5)" fill="currentColor"/></svg>
+        Milestone
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Name</label>
+      <input id="ms-name" type="text" placeholder="e.g. Launch Beta, API Complete…">
+    </div>
+    <div class="field">
+      <label>Thread</label>
+      <select id="ms-thread"></select>
+    </div>
+    <div class="field-row">
+      <div class="field" id="start-field"><label id="start-label">Start</label><input id="ms-start" type="date"></div>
+      <div class="field" id="end-field"><label>End</label><input id="ms-end" type="date"></div>
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="ms-notes" placeholder="Any context…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="ms-del-btn" onclick="deleteMs()" style="margin-right:auto;display:none">Delete</button>
+      <button class="btn btn-secondary" onclick="closeMs()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMs()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Thread Modal (add + edit) -->
+<div class="overlay hide" id="thread-modal">
+  <div class="modal" style="max-width:360px">
+    <h2 id="thread-modal-title">Add Thread</h2>
+    <div class="field">
+      <label>Name</label>
+      <input id="t-name" type="text" placeholder="e.g. Frontend, Backend, Design…">
+    </div>
+    <div class="field">
+      <label>Color</label>
+      <div class="color-row" id="color-row"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="t-del-btn" onclick="delThreadFromModal()" style="margin-right:auto;display:none">Delete thread</button>
+      <button class="btn btn-secondary" onclick="closeThread()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveThread()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+const PALETTE = [
+  '#4f46e5','#7c3aed','#db2777','#dc2626','#ea580c',
+  '#d97706','#16a34a','#0891b2','#0284c7','#475569'
+];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ZOOM = {
+  day:     { ppd: 36, tick: 1,  tickFmt: d => d.getDate(),                       mStep: 1 },
+  week:    { ppd: 12, tick: 7,  tickFmt: d => `${d.getMonth()+1}/${d.getDate()}`, mStep: 1 },
+  month:   { ppd: 4,  tick: 14, tickFmt: d => `${d.getMonth()+1}/${d.getDate()}`, mStep: 1 },
+  quarter: { ppd: 2,  tick: 30, tickFmt: d => MONTHS[d.getMonth()],               mStep: 3 },
+};
+
+// Bar / marker geometry (px)
+const BAR_H    = 14;   // task bar height
+const BAR_TOP  = 6;    // offset from row top (first lane)
+const DIAM_S   = 12;   // diamond size
+const LANE_H   = 26;   // vertical stride per lane
+const ROW_PAD  = 10;   // bottom padding in row
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let S = { threads: [], milestones: [] };
+let zoom = 'week';
+let editId = null;
+let pickColor = PALETTE[0];
+let currentType = 'task';
+
+// ─── Persist ───────────────────────────────────────────────────────────────
+const KEY = 'ms-tracker-v3';
+function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) { S = JSON.parse(r); } } catch(e) {}
+  // backfill type for old data
+  S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
+  if (!S.threads || !S.threads.length) seed();
+}
+function seed() {
+  S.threads = [
+    { id:'t1', name:'Product',     color:'#4f46e5' },
+    { id:'t2', name:'Engineering', color:'#16a34a' },
+    { id:'t3', name:'Design',      color:'#db2777' },
+  ];
+  const td = new Date(); td.setHours(0,0,0,0);
+  const d = n => { const x = new Date(td); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); };
+  S.milestones = [
+    { id:'m1', type:'task',      threadId:'t1', name:'Kickoff',           start:d(-21), end:d(-18), notes:'' },
+    { id:'m2', type:'task',      threadId:'t2', name:'API Design',        start:d(-18), end:d(-5),  notes:'' },
+    { id:'m3', type:'task',      threadId:'t3', name:'Wireframes',        start:d(-14), end:d(-3),  notes:'' },
+    { id:'m4', type:'milestone', threadId:'t1', name:'Design sign-off',   start:d(-3),  end:d(-3),  notes:'' },
+    { id:'m5', type:'task',      threadId:'t2', name:'Backend build',     start:d(-4),  end:d(12),  notes:'' },
+    { id:'m6', type:'task',      threadId:'t3', name:'Visual design',     start:d(-2),  end:d(10),  notes:'' },
+    { id:'m7', type:'milestone', threadId:'t2', name:'API freeze',        start:d(8),   end:d(8),   notes:'' },
+    { id:'m8', type:'task',      threadId:'t1', name:'Beta launch',       start:d(13),  end:d(17),  notes:'' },
+    { id:'m9', type:'task',      threadId:'t2', name:'QA',                start:d(14),  end:d(22),  notes:'' },
+    { id:'m10',type:'milestone', threadId:'t1', name:'v1.0 ship',         start:d(25),  end:d(25),  notes:'' },
+  ];
+  save();
+}
+
+// ─── Dates ─────────────────────────────────────────────────────────────────
+function pd(s) { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); }
+function fd(d) { return d.toISOString ? d.toISOString().slice(0,10) : d; }
+function addD(d,n) { const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function diffD(a,b) { return Math.round((b-a)/86400000); }
+function uid() { return Math.random().toString(36).slice(2,9); }
+function fmtShort(d) { return `${MONTHS[d.getMonth()]} ${d.getDate()}`; }
+
+// ─── Range ─────────────────────────────────────────────────────────────────
+function getRange() {
+  const td = new Date(); td.setHours(0,0,0,0);
+  if (!S.milestones.length) return { start: addD(td,-7), end: addD(td,30) };
+  let mn = new Date(8.64e15), mx = new Date(-8.64e15);
+  S.milestones.forEach(m => {
+    const s = pd(m.start), e = pd(m.end);
+    if (s < mn) mn = s;
+    if (e > mx) mx = e;
+  });
+  return { start: addD(mn, -10), end: addD(mx, 10) };
+}
+
+// ─── Zoom ──────────────────────────────────────────────────────────────────
+function setZoom(z) {
+  zoom = z;
+  document.querySelectorAll('.zoom-group button').forEach(b => b.classList.remove('active'));
+  document.getElementById('z-'+z).classList.add('active');
+  renderGantt();
+}
+
+// ─── Export / Import ───────────────────────────────────────────────────────
+function doExport() {
+  const b = new Blob([JSON.stringify(S,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'milestones.json'; a.click();
+}
+function doImport(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      S = JSON.parse(ev.target.result);
+      S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
+      save(); render();
+    } catch(err) { alert('Invalid file'); }
+  };
+  r.readAsText(f); e.target.value = '';
+}
+
+// ─── Sidebar ───────────────────────────────────────────────────────────────
+function renderSidebar() {
+  document.getElementById('thread-list').innerHTML = S.threads.map(t => `
+    <div class="thread-item" draggable="true" data-tid="${t.id}" onclick="openThreadEdit('${t.id}')">
+      <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+      <div class="tdot" style="background:${t.color}"></div>
+      <span class="tname">${esc(t.name)}</span>
+      <span class="tedit" title="Edit thread">✎</span>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:11px;padding:3px">No threads yet</div>';
+  initThreadDrag();
+
+  const byThread = {};
+  S.threads.forEach(t => byThread[t.id] = t);
+
+  document.getElementById('ms-list').innerHTML = S.milestones.length
+    ? S.milestones.map(m => {
+        const t = byThread[m.threadId];
+        const isMilestone = m.type === 'milestone';
+        const icon = isMilestone
+          ? `<span class="diamond-icon" style="background:${t ? t.color : '#999'}"></span>`
+          : `<span style="display:inline-block;width:8px;height:5px;border-radius:2px;background:${t ? t.color : '#999'};flex-shrink:0"></span>`;
+        const dateStr = isMilestone
+          ? fmtShort(pd(m.start))
+          : `${fmtShort(pd(m.start))} – ${fmtShort(pd(m.end))}`;
+        return `<div class="ms-card" onclick="openMs('${m.id}')">
+          <div class="ms-card-name">${icon}${esc(m.name)}</div>
+          <div class="ms-card-meta">${t ? esc(t.name)+' · ' : ''}${dateStr}</div>
+        </div>`;
+      }).join('')
+    : '<div style="padding:14px 8px;color:var(--muted);font-size:11px;text-align:center">No items yet</div>';
+}
+
+// ─── Gantt ─────────────────────────────────────────────────────────────────
+function renderGantt() {
+  const mount = document.getElementById('gantt-mount');
+  if (!S.threads.length) {
+    mount.innerHTML = `<div class="gantt-empty">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.3;margin-bottom:10px">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v6M15 3v6"/>
+      </svg>
+      <h3>No threads yet</h3><p>Add a thread, then add items to it.</p>
+    </div>`;
+    return;
+  }
+
+  const { start, end } = getRange();
+  const zl = ZOOM[zoom];
+  const ppd = zl.ppd;
+  const total = diffD(start, end);
+  const W = total * ppd;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayX = diffD(start, today) * ppd;
+
+  // ── Header ──────────────────────────────
+  let hdrHTML = '';
+  if (todayX >= 0 && todayX <= W)
+    hdrHTML += `<div class="today-dot" style="left:${todayX}px"></div>`;
+
+  let c = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (c <= end) {
+    const x = Math.max(0, diffD(start, c) * ppd);
+    hdrHTML += `<div class="tl-month" style="left:${x+4}px">${MONTHS[c.getMonth()]} ${c.getFullYear()}</div>`;
+    c = new Date(c.getFullYear(), c.getMonth() + zl.mStep, 1);
+  }
+  let tc = new Date(start);
+  while (tc <= end) {
+    const x = diffD(start, tc) * ppd;
+    hdrHTML += `<div class="tl-tick" style="left:${x}px">${zl.tickFmt(tc)}</div>`;
+    tc = addD(tc, zl.tick);
+  }
+
+  // ── Rows ────────────────────────────────
+  const rows = S.threads.map(thread => {
+    const items = S.milestones.filter(m => m.threadId === thread.id);
+
+    // Build background
+    let body = '';
+    let mc = new Date(start.getFullYear(), start.getMonth(), 1);
+    let mi = 0;
+    while (mc <= end) {
+      const x1 = Math.max(0, diffD(start, mc) * ppd);
+      const nx = new Date(mc.getFullYear(), mc.getMonth()+1, 1);
+      const x2 = Math.min(W, diffD(start, nx) * ppd);
+      if (mi % 2 === 0) body += `<div class="month-bg" style="left:${x1}px;width:${x2-x1}px"></div>`;
+      mc = nx; mi++;
+    }
+
+    let gc = new Date(start);
+    while (gc <= end) {
+      body += `<div class="grid-line" style="left:${diffD(start,gc)*ppd}px"></div>`;
+      gc = addD(gc, zl.tick);
+    }
+    if (todayX >= 0 && todayX <= W)
+      body += `<div class="today-line" style="left:${todayX}px"></div>`;
+
+    // Lane placement — include estimated label width in collision footprint
+    // so that milestone labels (which extend right of the diamond) don't overlap
+    function estLabelW(name) { return Math.ceil(name.length * 6.8) + 10; }
+
+    const placed = [];
+    items.forEach(m => {
+      const isMile = m.type === 'milestone';
+      const sDate = pd(m.start);
+      const eDate = isMile ? sDate : pd(m.end);
+      const x = diffD(start, sDate) * ppd;
+      const w = isMile ? DIAM_S : Math.max((diffD(sDate, eDate)+1)*ppd, 4);
+      // For milestones: footprint = diamond + gap + label text width
+      // For tasks: footprint = bar width (label floats above, doesn't conflict horizontally)
+      const footprint = isMile ? DIAM_S + 6 + estLabelW(m.name) : w;
+
+      // find lowest free lane
+      let lane = 0;
+      while (placed.some(p => p.lane===lane && x < p.x+p.footprint && x+footprint > p.x)) lane++;
+      placed.push({ lane, x, w, footprint, m });
+    });
+
+    const maxLane = placed.length ? Math.max(...placed.map(p=>p.lane)) : 0;
+    const rowH = (maxLane+1) * LANE_H + BAR_TOP + ROW_PAD;
+
+    // Render each item
+    placed.forEach(({ lane, x, w, m }) => {
+      const isMile = m.type === 'milestone';
+      const top = BAR_TOP + lane * LANE_H;
+      const color = thread.color;
+
+      if (isMile) {
+        // Diamond — center on the date
+        const cx = x + w/2; // x is already dateX*ppd, w is DIAM_S
+        const dLeft = cx - DIAM_S/2;
+        const dTop  = top + (BAR_H - DIAM_S)/2 + 2;
+        body += `<div class="ms-diamond"
+          style="left:${dLeft}px;top:${dTop}px;width:${DIAM_S}px;height:${DIAM_S}px;background:${color}"
+          onclick="openMs('${m.id}')"
+          title="${esc(m.name)} · ${m.start}${m.notes?'\n'+m.notes:''}"></div>`;
+        // Label to the right of diamond
+        const labelLeft = dLeft + DIAM_S + 5;
+        const labelTop  = dTop + DIAM_S/2 - 5;
+        body += `<div class="ms-label" style="left:${labelLeft}px;top:${labelTop}px;color:${color}">${esc(m.name)}</div>`;
+      } else {
+        // Bar
+        const barTop = top + (LANE_H - BAR_H)/2 - 2;
+        body += `<div class="ms-bar"
+          style="left:${x}px;width:${w}px;top:${barTop}px;background:${color}"
+          onclick="openMs('${m.id}')"
+          title="${esc(m.name)} · ${m.start} → ${m.end}${m.notes?'\n'+m.notes:''}"></div>`;
+        // Label above the bar, left-aligned to bar start
+        const labelTop = barTop - 13;
+        body += `<div class="ms-label" style="left:${x}px;top:${Math.max(1,labelTop)}px">${esc(m.name)}</div>`;
+      }
+    });
+
+    return `<tr>
+      <td class="gantt-cell-label" style="height:${rowH}px">
+        <div class="row-label-inner">
+          <div class="tdot" style="background:${thread.color}"></div>
+          ${esc(thread.name)}
+        </div>
+      </td>
+      <td class="gantt-cell-body" style="height:${rowH}px">
+        <div class="tl-wrap" style="width:${W}px;height:${rowH}px;position:relative">${body}</div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  mount.innerHTML = `
+  <table class="gantt-table" style="min-width:100%;table-layout:fixed">
+    <thead>
+      <tr>
+        <th class="gantt-hdr-label" style="position:sticky;top:0;width:var(--label-w);min-width:var(--label-w)">Track</th>
+        <th class="gantt-hdr-tl" style="position:sticky;top:0">
+          <div class="tl-wrap" style="width:${W}px;height:var(--hdr-h);position:relative">${hdrHTML}</div>
+        </th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  // Scroll to today
+  const scr = document.getElementById('gantt-scroll');
+  requestAnimationFrame(() => {
+    scr.scrollLeft = Math.max(0, todayX - scr.clientWidth * 0.35);
+  });
+}
+
+function scrollToday() {
+  const { start } = getRange();
+  const ppd = ZOOM[zoom].ppd;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const x = diffD(start, today) * ppd;
+  const scr = document.getElementById('gantt-scroll');
+  scr.scrollTo({ left: Math.max(0, x - scr.clientWidth*0.4), behavior:'smooth' });
+}
+
+// ─── Type toggle ───────────────────────────────────────────────────────────
+function setType(t) {
+  currentType = t;
+  document.getElementById('type-task').classList.toggle('active', t==='task');
+  document.getElementById('type-milestone').classList.toggle('active', t==='milestone');
+  document.getElementById('end-field').style.display = t==='milestone' ? 'none' : '';
+  document.getElementById('start-label').textContent = t==='milestone' ? 'Date' : 'Start';
+}
+
+// ─── Thread modal ──────────────────────────────────────────────────────────
+let editThreadId = null;
+
+function buildPicker() {
+  document.getElementById('color-row').innerHTML = PALETTE.map(c =>
+    `<div class="cswatch ${c===pickColor?'sel':''}" style="background:${c}" onclick="pickC('${c}')"></div>`
+  ).join('');
+}
+function pickC(c) { pickColor = c; buildPicker(); }
+
+function openThread() {
+  editThreadId = null;
+  pickColor = PALETTE[S.threads.length % PALETTE.length];
+  buildPicker();
+  document.getElementById('t-name').value = '';
+  document.getElementById('thread-modal-title').textContent = 'Add Thread';
+  document.getElementById('t-del-btn').style.display = 'none';
+  show('thread-modal');
+  setTimeout(() => document.getElementById('t-name').focus(), 60);
+}
+
+function openThreadEdit(id) {
+  const t = S.threads.find(x => x.id === id);
+  if (!t) return;
+  editThreadId = id;
+  pickColor = t.color;
+  buildPicker();
+  document.getElementById('t-name').value = t.name;
+  document.getElementById('thread-modal-title').textContent = 'Edit Thread';
+  document.getElementById('t-del-btn').style.display = '';
+  show('thread-modal');
+  setTimeout(() => document.getElementById('t-name').focus(), 60);
+}
+
+function closeThread() { hide('thread-modal'); editThreadId = null; }
+
+function saveThread() {
+  const name = document.getElementById('t-name').value.trim();
+  if (!name) { document.getElementById('t-name').focus(); return; }
+  if (editThreadId) {
+    const t = S.threads.find(x => x.id === editThreadId);
+    t.name = name; t.color = pickColor;
+  } else {
+    S.threads.push({ id: uid(), name, color: pickColor });
+  }
+  save(); render(); closeThread();
+}
+
+function delThreadFromModal() {
+  if (!editThreadId) return;
+  if (!confirm('Remove this thread and all its items?')) return;
+  S.threads = S.threads.filter(t => t.id !== editThreadId);
+  S.milestones = S.milestones.filter(m => m.threadId !== editThreadId);
+  save(); render(); closeThread();
+}
+
+function delThread(id) {
+  if (!confirm('Remove this thread and all its items?')) return;
+  S.threads = S.threads.filter(t => t.id !== id);
+  S.milestones = S.milestones.filter(m => m.threadId !== id);
+  save(); render();
+}
+
+// ─── Milestone modal ───────────────────────────────────────────────────────
+function openMs(id) {
+  if (!S.threads.length) { alert('Add a thread first!'); return; }
+  editId = id || null;
+  const sel = document.getElementById('ms-thread');
+  sel.innerHTML = S.threads.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+  const delBtn = document.getElementById('ms-del-btn');
+
+  if (id) {
+    const m = S.milestones.find(x => x.id === id);
+    document.getElementById('ms-modal-title').textContent = 'Edit Item';
+    setType(m.type || 'task');
+    document.getElementById('ms-name').value = m.name;
+    sel.value = m.threadId;
+    document.getElementById('ms-start').value = m.start;
+    document.getElementById('ms-end').value = m.end;
+    document.getElementById('ms-notes').value = m.notes || '';
+    delBtn.style.display = '';
+  } else {
+    document.getElementById('ms-modal-title').textContent = 'Add Item';
+    setType('task');
+    document.getElementById('ms-name').value = '';
+    const td = fd(new Date());
+    document.getElementById('ms-start').value = td;
+    document.getElementById('ms-end').value = td;
+    document.getElementById('ms-notes').value = '';
+    delBtn.style.display = 'none';
+  }
+  show('ms-modal');
+  setTimeout(() => document.getElementById('ms-name').focus(), 60);
+}
+function closeMs() { hide('ms-modal'); editId = null; }
+function saveMs() {
+  const name   = document.getElementById('ms-name').value.trim();
+  const thId   = document.getElementById('ms-thread').value;
+  const start  = document.getElementById('ms-start').value;
+  const rawEnd = document.getElementById('ms-end').value;
+  const end    = currentType === 'milestone' ? start : rawEnd;
+  const notes  = document.getElementById('ms-notes').value.trim();
+
+  if (!name)  { document.getElementById('ms-name').focus(); return; }
+  if (!start) { alert('Set a date'); return; }
+  if (currentType === 'task' && end < start) { alert('End must be after start'); return; }
+
+  if (editId) {
+    Object.assign(S.milestones.find(m => m.id === editId), { name, type: currentType, threadId: thId, start, end, notes });
+  } else {
+    S.milestones.push({ id: uid(), name, type: currentType, threadId: thId, start, end, notes });
+  }
+  save(); render(); closeMs();
+}
+function deleteMs() {
+  if (!confirm('Delete this item?')) return;
+  S.milestones = S.milestones.filter(m => m.id !== editId);
+  save(); render(); closeMs();
+}
+
+// ─── Thread drag-to-reorder ────────────────────────────────────────────────
+let dragSrcId = null;
+
+function initThreadDrag() {
+  const items = document.querySelectorAll('#thread-list .thread-item');
+  items.forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragSrcId = el.dataset.tid;
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('#thread-list .thread-item').forEach(x => x.classList.remove('drag-over'));
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('#thread-list .thread-item').forEach(x => x.classList.remove('drag-over'));
+      if (el.dataset.tid !== dragSrcId) el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      const targetId = el.dataset.tid;
+      if (!dragSrcId || dragSrcId === targetId) return;
+      const srcIdx = S.threads.findIndex(t => t.id === dragSrcId);
+      const tgtIdx = S.threads.findIndex(t => t.id === targetId);
+      // Move src to target position
+      const [moved] = S.threads.splice(srcIdx, 1);
+      S.threads.splice(tgtIdx, 0, moved);
+      save(); render();
+    });
+  });
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function show(id) { document.getElementById(id).classList.remove('hide'); }
+function hide(id) { document.getElementById(id).classList.add('hide'); }
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeMs(); closeThread(); }
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (!document.getElementById('ms-modal').classList.contains('hide')) saveMs();
+    if (!document.getElementById('thread-modal').classList.contains('hide')) saveThread();
+  }
+});
+['ms-modal','thread-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === e.currentTarget) { closeMs(); closeThread(); }
+  });
+});
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+function render() { renderSidebar(); renderGantt(); }
+load(); render();
+</script>
+</body>
+</html>
