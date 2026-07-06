@@ -501,7 +501,7 @@ function _showStatus(msg, ok) {
   el.style.color = '#fff';
   el.style.opacity = '1';
   clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 8000);
 }
 
 function save() {
@@ -532,6 +532,7 @@ async function load() {
     return;
   }
   document.title = '⧳ Loading…';
+  _showStatus('Loading from JSONBin…', true);
   try {
     const res = await fetch(`${_BASE}/${_bin}/latest`, {
       headers: { 'X-Master-Key': _key },
@@ -541,12 +542,14 @@ async function load() {
       S = json.record;
       S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
       if (!S.threads || !S.threads.length) seed();
+      _showStatus('✓ Loaded ' + (S.threads||[]).length + ' threads', true);
     } else {
       const t = await res.text();
       console.error('JSONBin load failed:', res.status, t);
+      _showStatus('Load failed ' + res.status + ': ' + t.slice(0,80), false);
       seed();
     }
-  } catch(e) { console.error('JSONBin load error:', e); seed(); }
+  } catch(e) { console.error('JSONBin load error:', e); _showStatus('Load error: ' + e.message, false); seed(); }
   _loaded = true;
   document.title = 'Milestone Tracker';
   render();
