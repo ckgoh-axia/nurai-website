@@ -480,13 +480,9 @@ let pickColor = PALETTE[0];
 let currentType = 'task';
 
 // ─── Shared persistence via JSONBin ───────────────────────────────────────
-// Usage: add ?bin=BIN_ID&key=MASTER_KEY to the URL
-// Get a free key at https://jsonbin.io — create one bin, share that URL.
-// Falls back to localStorage when no params are present.
-const _p    = new URLSearchParams(location.search);
-const _bin  = _p.get('bin');
-const _key  = _p.get('key');
-const _shared = !!(  _bin && _key);
+const _bin  = '6a3b5f6dda38895dfef5624f';
+const _key  = '$2a$10$BM/QY4Rzz2/6LZ1KyRIyfuU.zmSeyt5vKbL1rkDoWZSn7sp3vJPeS';
+const _shared = true;
 const _BASE = 'https://api.jsonbin.io/v3/b';
 
 let _saveTimer = null;
