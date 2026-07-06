@@ -486,15 +486,39 @@ const _shared = true;
 const _BASE = 'https://api.jsonbin.io/v3/b';
 
 let _saveTimer = null;
+let _loaded = false; // guard: don't write before initial load completes
+
+function _showStatus(msg, ok) {
+  let el = document.getElementById('_sync-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_sync-status';
+    el.style.cssText = 'position:fixed;bottom:12px;right:16px;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;z-index:9999;transition:opacity 0.5s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.background = ok ? '#16a34a' : '#dc2626';
+  el.style.color = '#fff';
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
 function save() {
   if (!_shared) { localStorage.setItem('ms-tracker-v3', JSON.stringify(S)); return; }
+  if (!_loaded) return; // don't save before first load completes
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => {
     fetch(`${_BASE}/${_bin}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': _key },
       body: JSON.stringify(S),
-    }).catch(() => {});
+    })
+    .then(r => {
+      if (r.ok) { _showStatus('✓ Saved', true); }
+      else { r.text().then(t => { console.error('JSONBin save failed:', r.status, t); _showStatus('Save failed ' + r.status, false); }); }
+    })
+    .catch(e => { console.error('JSONBin save error:', e); _showStatus('Save error', false); });
   }, 800);
 }
 
@@ -503,6 +527,7 @@ async function load() {
     try { const r = localStorage.getItem('ms-tracker-v3'); if (r) S = JSON.parse(r); } catch(e) {}
     S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
     if (!S.threads || !S.threads.length) seed();
+    _loaded = true;
     render();
     return;
   }
@@ -516,8 +541,13 @@ async function load() {
       S = json.record;
       S.milestones && S.milestones.forEach(m => { if (!m.type) m.type = 'task'; });
       if (!S.threads || !S.threads.length) seed();
-    } else { seed(); }
-  } catch(e) { seed(); }
+    } else {
+      const t = await res.text();
+      console.error('JSONBin load failed:', res.status, t);
+      seed();
+    }
+  } catch(e) { console.error('JSONBin load error:', e); seed(); }
+  _loaded = true;
   document.title = 'Milestone Tracker';
   render();
 }
@@ -541,7 +571,8 @@ function seed() {
     { id:'m9', type:'task',      threadId:'t2', name:'QA',                start:d(14),  end:d(22),  notes:'' },
     { id:'m10',type:'milestone', threadId:'t1', name:'v1.0 ship',         start:d(25),  end:d(25),  notes:'' },
   ];
-  save();
+  // Do NOT call save() here — seed() is a local fallback only.
+  // Calling save() would overwrite real data in JSONBin on a failed fetch.
 }
 
 // ─── Dates ─────────────────────────────────────────────────────────────────
