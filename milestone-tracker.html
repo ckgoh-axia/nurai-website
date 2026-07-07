@@ -353,29 +353,36 @@ body {
 .thread-item.t-hidden .tname { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
 .teye {
   opacity: 0;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
   color: var(--muted);
   cursor: pointer;
-  padding: 1px 3px;
+  padding: 2px 3px;
   border-radius: 3px;
   flex-shrink: 0;
 }
 .thread-item:hover .teye { opacity: 1; }
-.thread-item.t-hidden .teye { opacity: 0.5; }
+.thread-item.t-hidden .teye { opacity: 0.6; color: #94a3b8; }
 .thread-item.t-hidden:hover .teye { opacity: 1; }
 .teye:hover { background: #e0f2fe; color: #0284c7; }
 .filter-bar {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px 10px;
   border-bottom: 1px solid var(--border);
   background: #fafbff;
   flex-shrink: 0;
 }
+.filter-search-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 .filter-bar input {
   flex: 1;
-  padding: 4px 8px;
+  min-width: 0;
+  padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: 5px;
   font-size: 12px;
@@ -385,10 +392,14 @@ body {
   outline: none;
 }
 .filter-bar input:focus { border-color: var(--primary); }
-.filter-chips { display: flex; gap: 4px; }
+.filter-chips {
+  display: flex;
+  gap: 3px;
+}
 .fchip {
-  padding: 3px 8px;
-  font-size: 11px;
+  flex: 1;
+  padding: 3px 0;
+  font-size: 10px;
   font-weight: 600;
   border-radius: 4px;
   cursor: pointer;
@@ -396,29 +407,10 @@ body {
   background: var(--surface);
   color: var(--muted);
   white-space: nowrap;
+  text-align: center;
 }
 .fchip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .fchip:not(.active):hover { background: var(--bg); }
-.filter-clear {
-  font-size: 11px;
-  color: var(--primary);
-  cursor: pointer;
-  white-space: nowrap;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-.filter-clear:hover { background: #eef2ff; }
-.filter-active-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 700;
-}
 </style>
 </head>
 <body>
@@ -454,7 +446,9 @@ body {
       <div id="thread-list"></div>
     </div>
     <div class="filter-bar">
-      <input type="text" id="f-search" placeholder="Search…" oninput="applyFilter()">
+      <div class="filter-search-row">
+        <input type="text" id="f-search" placeholder="Search items…" oninput="applyFilter()">
+      </div>
       <div class="filter-chips">
         <div class="fchip active" id="fc-all"   onclick="setTypeFilter('all')">All</div>
         <div class="fchip"       id="fc-task"   onclick="setTypeFilter('task')">Tasks</div>
@@ -737,15 +731,18 @@ function doImport(e) {
 }
 
 // ─── Sidebar ───────────────────────────────────────────────────────────────
+const EYE_ON  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_OFF = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
 function renderSidebar() {
   document.getElementById('thread-list').innerHTML = S.threads.map(t => {
     const isHidden = hiddenThreads.has(t.id);
     return `
-    <div class="thread-item ${isHidden ? 't-hidden' : ''}" draggable="true" data-tid="${t.id}" onclick="openThreadEdit('${t.id}')">
+    <div class="thread-item ${isHidden ? 't-hidden' : ''}" draggable="true" data-tid="${t.id}">
       <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
       <div class="tdot" style="background:${t.color}"></div>
-      <span class="tname">${esc(t.name)}</span>
-      <span class="teye" title="${isHidden ? 'Show' : 'Hide'} thread" onclick="toggleThread('${t.id}', event)">${isHidden ? '○' : '●'}</span>
+      <span class="tname" onclick="openThreadEdit('${t.id}')">${esc(t.name)}</span>
+      <span class="teye" title="${isHidden ? 'Show thread' : 'Hide thread'}" onclick="toggleThread('${t.id}', event)">${isHidden ? EYE_OFF : EYE_ON}</span>
       <span class="tedit" title="Edit thread" onclick="event.stopPropagation();openThreadEdit('${t.id}')">✎</span>
     </div>`;
   }).join('') || '<div style="color:var(--muted);font-size:11px;padding:3px">No threads yet</div>';
