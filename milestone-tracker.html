@@ -347,6 +347,78 @@ body {
   transform: rotate(45deg);
   flex-shrink: 0;
 }
+
+/* ── Filter ───────────────────────────────── */
+.thread-item.t-hidden .tdot { opacity: 0.2; }
+.thread-item.t-hidden .tname { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.teye {
+  opacity: 0;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 1px 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.thread-item:hover .teye { opacity: 1; }
+.thread-item.t-hidden .teye { opacity: 0.5; }
+.thread-item.t-hidden:hover .teye { opacity: 1; }
+.teye:hover { background: #e0f2fe; color: #0284c7; }
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: #fafbff;
+  flex-shrink: 0;
+}
+.filter-bar input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+}
+.filter-bar input:focus { border-color: var(--primary); }
+.filter-chips { display: flex; gap: 4px; }
+.fchip {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.fchip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.fchip:not(.active):hover { background: var(--bg); }
+.filter-clear {
+  font-size: 11px;
+  color: var(--primary);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.filter-clear:hover { background: #eef2ff; }
+.filter-active-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -380,6 +452,14 @@ body {
     <div class="sidebar-top">
       <div class="sidebar-label">Threads</div>
       <div id="thread-list"></div>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="f-search" placeholder="Search…" oninput="applyFilter()">
+      <div class="filter-chips">
+        <div class="fchip active" id="fc-all"   onclick="setTypeFilter('all')">All</div>
+        <div class="fchip"       id="fc-task"   onclick="setTypeFilter('task')">Tasks</div>
+        <div class="fchip"       id="fc-mile"   onclick="setTypeFilter('milestone')">Milestones</div>
+      </div>
     </div>
     <div class="ms-list" id="ms-list"></div>
   </div>
@@ -478,6 +558,35 @@ let zoom = 'week';
 let editId = null;
 let pickColor = PALETTE[0];
 let currentType = 'task';
+
+// ─── Filter state (local, not persisted) ───────────────────────────────────
+let hiddenThreads = new Set();  // thread IDs hidden from Gantt
+let filterType = 'all';         // 'all' | 'task' | 'milestone'
+
+function visibleThreads() { return S.threads.filter(t => !hiddenThreads.has(t.id)); }
+function filteredMilestones() {
+  const q = (document.getElementById('f-search')?.value||'').toLowerCase();
+  return S.milestones.filter(m => {
+    if (hiddenThreads.has(m.threadId)) return false;
+    if (filterType !== 'all' && m.type !== filterType) return false;
+    if (q && !m.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function toggleThread(id, e) {
+  e && e.stopPropagation();
+  if (hiddenThreads.has(id)) hiddenThreads.delete(id);
+  else hiddenThreads.add(id);
+  render();
+}
+function setTypeFilter(t) {
+  filterType = t;
+  ['all','task','mile'].forEach(k => document.getElementById('fc-'+k).classList.remove('active'));
+  document.getElementById('fc-'+(t==='milestone'?'mile':t)).classList.add('active');
+  render();
+}
+function applyFilter() { render(); }
 
 // ─── Shared persistence via JSONBin ───────────────────────────────────────
 const _bin  = '6a3b5f6dda38895dfef5624f';
@@ -589,9 +698,10 @@ function fmtShort(d) { return `${MONTHS[d.getMonth()]} ${d.getDate()}`; }
 // ─── Range ─────────────────────────────────────────────────────────────────
 function getRange() {
   const td = new Date(); td.setHours(0,0,0,0);
-  if (!S.milestones.length) return { start: addD(td,-7), end: addD(td,30) };
+  const visible = filteredMilestones();
+  if (!visible.length) return { start: addD(td,-7), end: addD(td,30) };
   let mn = new Date(8.64e15), mx = new Date(-8.64e15);
-  S.milestones.forEach(m => {
+  visible.forEach(m => {
     const s = pd(m.start), e = pd(m.end);
     if (s < mn) mn = s;
     if (e > mx) mx = e;
@@ -628,20 +738,25 @@ function doImport(e) {
 
 // ─── Sidebar ───────────────────────────────────────────────────────────────
 function renderSidebar() {
-  document.getElementById('thread-list').innerHTML = S.threads.map(t => `
-    <div class="thread-item" draggable="true" data-tid="${t.id}" onclick="openThreadEdit('${t.id}')">
+  document.getElementById('thread-list').innerHTML = S.threads.map(t => {
+    const isHidden = hiddenThreads.has(t.id);
+    return `
+    <div class="thread-item ${isHidden ? 't-hidden' : ''}" draggable="true" data-tid="${t.id}" onclick="openThreadEdit('${t.id}')">
       <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
       <div class="tdot" style="background:${t.color}"></div>
       <span class="tname">${esc(t.name)}</span>
-      <span class="tedit" title="Edit thread">✎</span>
-    </div>`).join('') || '<div style="color:var(--muted);font-size:11px;padding:3px">No threads yet</div>';
+      <span class="teye" title="${isHidden ? 'Show' : 'Hide'} thread" onclick="toggleThread('${t.id}', event)">${isHidden ? '○' : '●'}</span>
+      <span class="tedit" title="Edit thread" onclick="event.stopPropagation();openThreadEdit('${t.id}')">✎</span>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:11px;padding:3px">No threads yet</div>';
   initThreadDrag();
 
   const byThread = {};
   S.threads.forEach(t => byThread[t.id] = t);
 
-  document.getElementById('ms-list').innerHTML = S.milestones.length
-    ? S.milestones.map(m => {
+  const visible = filteredMilestones();
+  document.getElementById('ms-list').innerHTML = visible.length
+    ? visible.map(m => {
         const t = byThread[m.threadId];
         const isMilestone = m.type === 'milestone';
         const icon = isMilestone
@@ -655,7 +770,7 @@ function renderSidebar() {
           <div class="ms-card-meta">${t ? esc(t.name)+' · ' : ''}${dateStr}</div>
         </div>`;
       }).join('')
-    : '<div style="padding:14px 8px;color:var(--muted);font-size:11px;text-align:center">No items yet</div>';
+    : `<div style="padding:14px 8px;color:var(--muted);font-size:11px;text-align:center">${S.milestones.length ? 'No matches' : 'No items yet'}</div>`;
 }
 
 // ─── Gantt ─────────────────────────────────────────────────────────────────
@@ -699,8 +814,9 @@ function renderGantt() {
   }
 
   // ── Rows ────────────────────────────────
-  const rows = S.threads.map(thread => {
-    const items = S.milestones.filter(m => m.threadId === thread.id);
+  const activeMs = filteredMilestones();
+  const rows = visibleThreads().map(thread => {
+    const items = activeMs.filter(m => m.threadId === thread.id);
 
     // Build background
     let body = '';
