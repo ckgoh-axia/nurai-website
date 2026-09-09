@@ -2074,25 +2074,5 @@
         : 'none';
     }, { passive: true });
   </script>
-
-  <!-- ── NURAI CHAT WIDGET ──────────────────────────────────────────────────
-       This ONE LINE is the whole installation. Verified before adding it:
-         GET  staging.nurai.sg/widget.js                       -> 200 (5,127 bytes)
-         GET  /api/v1/public/bots/d0a476b3-…                   -> 200 anonymously
-         POST /api/v1/chat/d0a476b3-…  (no Authorization hdr)  -> 200, streams
-       No API key, no CORS entry, no build step, nothing else on this page.
-
-       `data-advisor-id` is the "Ask Nurai" advisor (external, live, mode=live),
-       which is what makes it anonymously embeddable — publish_rules requires
-       BOTH for `anonymous_embed_ok`.
-
-       ⚠ IT POINTS AT STAGING ON PURPOSE, AND THAT IS THE ONE THING TO REVIEW.
-       There is no "Ask Nurai" advisor on production — prod's only public
-       advisors are Power Bot, Travelgoogoo and พี่เหนือ, none of which answers
-       for Nurai. The widget's origin is taken from this script's own `src`, so
-       moving it to production later is a one-word edit here (staging -> app)
-       once an "Ask Nurai" exists there. -->
-  <script src="https://staging.nurai.sg/widget.js"
-          data-advisor-id="d0a476b3-dfbe-4a79-8081-c4272ace6672"></script>
 </body>
 </html>
